@@ -27,11 +27,11 @@ class Dbmanager {
 
   // =========Membuat table struktur=========
   static Future<void> _onCreate(Database db, int version) async {
-    log("Membuat struktu database...");
+    log("Membuat struktur database...");
     await db.execute(TableScheme.createTbUsaha);
     await db.execute(TableScheme.createTbItem);
     await db.execute(TableScheme.createTbTranshd);
-    await db.execute(TableScheme.createTbTranshd);
+    await db.execute(TableScheme.createTbTransdt);
   }
 
   // =========Upgrade Database [jika ada]=========

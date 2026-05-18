@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTema {
+  static TextStyle baseStyle = GoogleFonts.hankenGrotesk();
+  static TextStyle labelStyle = GoogleFonts.jetBrainsMono();
+
+  static Color clrPrimary = Color(0xff005b66);
+
   static ThemeData tema = ThemeData(
     visualDensity: const VisualDensity(vertical: -4),
-    // colorScheme: ColorScheme.fromSeed(
-    //   seedColor: Colors.blue,
-    //   primary: Colors.blue,
-    //   secondary: Colors.indigoAccent,
-    //   surface: Colors.white,
-    //   brightness: Brightness.light,
-    // ),
+    colorScheme: ColorScheme.fromSeed(seedColor: clrPrimary),
     dialogTheme: DialogThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     ),
-    appBarTheme: const AppBarTheme(leadingWidth: 40),
+    appBarTheme: AppBarTheme(foregroundColor: clrPrimary, titleSpacing: 0),
     cardTheme: CardThemeData(
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -25,20 +25,34 @@ class AppTema {
         hintStyle: TextStyle(fontSize: 13),
       ),
     ),
-    fontFamily: "Roboto",
     textTheme: ThemeData.light().textTheme.copyWith(
-      bodySmall: const TextStyle(fontSize: 10),
-      bodyMedium: const TextStyle(fontSize: 12),
-      bodyLarge: const TextStyle(fontSize: 13),
-      titleSmall: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
-      titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      titleLarge: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+      bodySmall: baseStyle.copyWith(fontSize: 10, color: Colors.black54),
+      bodyMedium: baseStyle.copyWith(fontSize: 12, color: Colors.black54),
+      bodyLarge: baseStyle.copyWith(fontSize: 13, color: Colors.black54),
+      titleSmall: baseStyle.copyWith(
+        fontSize: 14,
+        color: Colors.black87,
+        fontWeight: FontWeight.w700,
+      ),
+
+      titleMedium: baseStyle.copyWith(
+        fontSize: 16,
+        color: Colors.black87,
+        fontWeight: FontWeight.w700,
+      ),
+
+      titleLarge: baseStyle.copyWith(
+        fontSize: 18,
+        color: Colors.black87,
+        fontWeight: FontWeight.w700,
+      ),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       border: OutlineInputBorder(
         borderSide: BorderSide(color: Colors.black45, width: 0.5),
       ),
     ),
+
     useMaterial3: true,
   );
 }

@@ -5,17 +5,20 @@ class TableScheme {
   static const tbTransdt = "tb_transdt";
 
   static const createTbUsaha = '''CREATE TABLE $tbUsaha (
-    nama      TEXT,
-    alamat    TEXT,
-    email     TEXT,
-    user_name TEXT,
-    password  TEXT
+    nama          TEXT,
+    alamat        TEXT,
+    owner_name    TEXT,
+    email         TEXT,
+    password,
+    reseller_code TEXT (6) 
 );
 ''';
 
   static const createTbItem = '''CREATE TABLE $tbItem (
     id        INTEGER PRIMARY KEY,
     nama_item TEXT    CONSTRAINT nama_item UNIQUE,
+    barcode   TEXT    UNIQUE,
+    tag       TEXT,
     harga     REAL,
     stok      INTEGER
 );

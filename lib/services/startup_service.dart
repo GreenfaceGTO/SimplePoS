@@ -29,7 +29,7 @@ class AppStartUpService {
     UsahaModel? usaha = await usahaDao.getDataUsaha();
 
     if (usaha == null) {
-      return AppStartRoute.intro;
+      return AppStartRoute.register;
     } else {
       log(usaha.toMap().toString());
       if (usaha.password != null) {

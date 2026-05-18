@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/providers/providers.dart';
+import 'package:simplepos/services/utils/preferences.dart';
 import 'package:simplepos/services/utils/routes.dart';
 import 'package:simplepos/ui/page/splashscreen_page.dart';
 import 'package:simplepos/ui/theme.dart';
@@ -10,8 +11,8 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await Preference().init();
   runApp(const MyApp());
 }
 

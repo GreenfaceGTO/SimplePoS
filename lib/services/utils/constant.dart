@@ -1,3 +1,12 @@
+// ====== App Identifier ======
+const String appCompany = "Mitrasoft";
+const String appCompanyEmail = "mitrasoft.dev@gmail.com";
+const String appTitle = 'Simple PoS';
+const String appAuthor = 'Nan Gobel';
+const String appContact = "0851 7106 0653";
+
+const int appVersion = 1;
+
 // ====== Route Name ======
 const String rtLogin = "/login";
 const String rtRegister = "/register";
