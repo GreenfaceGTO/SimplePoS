@@ -10,8 +10,10 @@ class TableScheme {
     owner_name    TEXT,
     email         TEXT,
     password,
-    reseller_code TEXT (6) 
+    reseller_code TEXT (6),
+    logo_toko     TEXT
 );
+
 ''';
 
   static const createTbItem = '''CREATE TABLE $tbItem (

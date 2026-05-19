@@ -4,7 +4,7 @@ const String appCompanyEmail = "mitrasoft.dev@gmail.com";
 const String appTitle = 'Simple PoS';
 const String appAuthor = 'Nan Gobel';
 const String appContact = "0851 7106 0653";
-const String appCRight = "©2026 Simple PoS - MitraSoft, Semua Hak Dilindungi";
+const String appCRight = "©2026 Mitrasoft";
 
 const int appVersion = 1;
 
