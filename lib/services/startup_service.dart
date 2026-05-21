@@ -4,7 +4,7 @@ import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/services/connectivity_service.dart';
 
-enum AppStartRoute { intro, register, login, dashboard }
+enum AppStartRoute { intro, register, login, mainframe }
 
 class AppStartUpService {
   final ConnectivityService connectivityService;
@@ -16,26 +16,29 @@ class AppStartUpService {
     if (hasConnection) {
       final hasInternet = await connectivityService.hasInternet();
       if (hasInternet) {
-        log("$runtimeType : Ambil setting dari firebase...");
+        log("$runtimeType : Mengambil setting dari firebase...");
       } else {
-        log("$runtimeType : Ambil setting default...");
+        log("$runtimeType : 3. Ambil setting default...");
       }
     } else {
-      log("$runtimeType : Ambil setting default...");
+      log("$runtimeType : 3. Ambil setting default...");
     }
 
-    log("$runtimeType : Mengambil data usaha...");
+    log("$runtimeType : 4. Memeriksa dan mengambil data usaha...");
     UsahaDao usahaDao = UsahaDao();
     UsahaModel? usaha = await usahaDao.getDataUsaha();
 
     if (usaha == null) {
+      log("$runtimeType : Belum ada data usaha, lanjut ke no 5.");
       return AppStartRoute.register;
     } else {
+      log("$runtimeType : Ada data usaha, lanjut ke no 6.");
+
       log(usaha.toMap().toString());
       if (usaha.password != null) {
         return AppStartRoute.login;
       } else {
-        return AppStartRoute.dashboard;
+        return AppStartRoute.mainframe;
       }
     }
   }

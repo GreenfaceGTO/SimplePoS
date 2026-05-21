@@ -1,8 +1,21 @@
+import 'dart:developer';
+
 import 'package:simplepos/data/database/dbmanager.dart';
 import 'package:simplepos/data/database/table_scheme.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 
 class UsahaDao {
+  // =========Menyimpan data usaha=========
+  Future<void> saveUsaha(UsahaModel data) async {
+    final db = await Dbmanager.database;
+    try {
+      final result = await db.insert(TableScheme.tbUsaha, data.toMap());
+      log(result.toString());
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // =========Mengambil data usaha=========
   Future<UsahaModel?> getDataUsaha() async {
     final db = await Dbmanager.database;

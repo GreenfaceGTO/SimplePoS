@@ -6,6 +6,15 @@ class MasterdataRepo {
 
   MasterdataRepo({required this.usahaDao});
 
+  // =======Menyimpan data usaha=======
+  Future<void> saveDataUsaha(UsahaModel data) async {
+    try {
+      await usahaDao.saveUsaha(data);
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
   // =========Mengambil data usaha=========
   Future<UsahaModel?> getDataUsaha() async {
     try {

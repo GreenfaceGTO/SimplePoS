@@ -1,11 +1,14 @@
 import 'dart:developer';
-
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/providers/portal_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
+import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/public_widget.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -20,13 +23,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController txtAlamat = TextEditingController();
   final TextEditingController txtOwner = TextEditingController();
   final TextEditingController txtEmail = TextEditingController();
+  String pathFileLogo = '';
   final formKey = GlobalKey<FormState>();
   late PortalProvider portalProv;
 
   @override
   void initState() {
     portalProv = Provider.of<PortalProvider>(context, listen: false);
-
     super.initState();
   }
 
@@ -128,20 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
               },
             ),
             PublicWidget.spasi(jarak: 30),
-            Center(
-              child: SizedBox(
-                height: 45,
-                width: 200,
-                child: ElevatedButton.icon(
-                  iconAlignment: IconAlignment.end,
-                  onPressed: () {
-                    if (formKey.currentState!.validate()) {}
-                  },
-                  label: Text("DAFTAR SEKARANG"),
-                  icon: Icon(Icons.arrow_forward),
-                ),
-              ),
-            ),
+            _tombolDaftar(context),
             PublicWidget.spasi(jarak: 12),
             Text.rich(
               TextSpan(
@@ -171,6 +161,37 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  Center _tombolDaftar(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        height: 45,
+        width: 200,
+        child: ElevatedButton.icon(
+          iconAlignment: IconAlignment.end,
+          onPressed: () async {
+            if (formKey.currentState!.validate()) {
+              UsahaModel dataUsaha = UsahaModel(
+                logoToko: pathFileLogo,
+                namaUsaha: txtToko.text,
+                userName: txtOwner.text,
+                alamat: txtAlamat.text,
+                email: txtEmail.text,
+              );
+              log(dataUsaha.toMap().toString());
+              if (await portalProv.submitRegister(dataUsaha)) {
+                if (context.mounted) {
+                  Navigator.pushReplacementNamed(context, rtDashboard);
+                }
+              }
+            }
+          },
+          label: Text("DAFTAR SEKARANG"),
+          icon: Icon(Icons.arrow_forward),
+        ),
+      ),
+    );
+  }
+
   Align _photoFrame(BuildContext context, TextTheme tema) {
     return Align(
       alignment: Alignment.center,
@@ -179,44 +200,80 @@ class _RegisterPageState extends State<RegisterPage> {
         children: [
           Stack(
             children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(15),
-                onTap: () async {
-                  ImageSource? source =
-                      await PublicWidget.showImageSourceOption(context);
-                },
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey.shade100,
-                    border: Border.all(color: Colors.black45, width: 0.5),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add_a_photo, color: Colors.grey),
-                        PublicWidget.spasi(),
-                        Text("Logo Toko"),
-                      ],
-                    ),
-                  ),
+              Container(
+                clipBehavior: Clip.antiAlias,
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.blueGrey.shade100,
+                  border: Border.all(color: Colors.black45, width: 0.5),
+
+                  borderRadius: BorderRadius.circular(15),
                 ),
+                child: pathFileLogo.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.add_a_photo, color: Colors.grey),
+                            PublicWidget.spasi(),
+                            Text("Logo Toko"),
+                          ],
+                        ),
+                      )
+                    : Image.file(File(pathFileLogo), fit: BoxFit.cover),
               ),
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  maxRadius: 15,
-                  child: Icon(Icons.edit, size: 20, color: Colors.white),
+                child: GestureDetector(
+                  onTap: () async {
+                    if (pathFileLogo.isEmpty) {
+                      ImageSource? source =
+                          await PublicWidget.showImageSourceOption(context);
+                      if (source != null) {
+                        File? file = await PublicWidget.pickImage(
+                          source: source,
+                        );
+                        if (file != null) {
+                          String ext = p.extension(file.path).toLowerCase();
+                          if (ext == '.png' ||
+                              ext == '.jpg' ||
+                              ext == '.jpeg') {
+                            setState(() {
+                              pathFileLogo = file.path;
+                              log(pathFileLogo.toString());
+                            });
+                          } else {
+                            PublicWidget.showMessage(
+                              message: "Tipe file salah!",
+                              mode: MessageMode.error,
+                            );
+                          }
+                        }
+                      }
+                    } else {
+                      setState(() {
+                        pathFileLogo = '';
+                      });
+                    }
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: pathFileLogo.isEmpty
+                        ? Theme.of(context).primaryColor
+                        : Colors.red,
+                    maxRadius: 15,
+                    child: Icon(
+                      pathFileLogo.isEmpty ? Icons.add : Icons.clear,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-          Text("Maksimal 1MB (PNG/JPG)", style: tema.bodySmall),
+          Text("Maksimal 1MB (PNG/JPG/JPEG)", style: tema.bodySmall),
         ],
       ),
     );
