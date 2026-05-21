@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:simplepos/models/menu_model.dart';
-import 'package:simplepos/ui/dummy_page.dart';
+import 'package:simplepos/ui/tab_page/cart_tabpage.dart';
+import 'package:simplepos/ui/tab_page/dashboard_tabpage.dart';
+import 'package:simplepos/ui/tab_page/history_tabpage.dart';
+import 'package:simplepos/ui/tab_page/produk_tabpage.dart';
 
 class MainProvider with ChangeNotifier {
   int _currentPage = 0;
@@ -14,11 +17,10 @@ class MainProvider with ChangeNotifier {
 
   // ======Daftar Halaman Main======
   List<Widget> lstMainPage = [
-    DummyPage(caption: "Dashboard Page"),
-    DummyPage(caption: "Produk Page"),
-    DummyPage(caption: "Cart Page"),
-    DummyPage(caption: "History Page"),
-    DummyPage(caption: "Manage Page"),
+    DashboardTabpage(),
+    ProdukTabpage(),
+    CartTabpage(),
+    HistoryTabpage(),
   ];
 
   // ======Daftar menu bawah=======
@@ -27,6 +29,5 @@ class MainProvider with ChangeNotifier {
     MenuModel(label: "Produk", icon: Icon(Icons.inventory)),
     MenuModel(label: "Keranjang", icon: Icon(Icons.shopping_cart)),
     MenuModel(label: "Riwayat", icon: Icon(Icons.history)),
-    MenuModel(label: "Master", icon: Icon(Icons.settings)),
   ];
 }

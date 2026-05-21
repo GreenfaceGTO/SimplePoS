@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/providers/main_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
+import 'package:simplepos/ui/widget/menudrawer.dart';
 
 class MainframePage extends StatefulWidget {
   const MainframePage({super.key});
@@ -16,10 +17,9 @@ class _MainframePageState extends State<MainframePage> {
     return Consumer<MainProvider>(
       builder: (context, prov, _) {
         return Scaffold(
-          appBar: AppBar(
-            title: Text(appTitle),
-            leading: Icon(Icons.storefront_outlined),
-          ),
+          drawer: Menudrawer(),
+          appBar: AppBar(title: Text(appTitle)),
+
           body: IndexedStack(
             index: prov.currentPage,
             children: prov.lstMainPage.map((page) => page).toList(),

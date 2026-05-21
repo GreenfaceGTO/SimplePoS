@@ -9,7 +9,7 @@ import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/providers/portal_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
-import 'package:simplepos/ui/widget/public_widget.dart';
+import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -117,7 +117,6 @@ class _RegisterPageState extends State<RegisterPage> {
             PublicWidget.spasi(),
             TextFormField(
               controller: txtEmail,
-
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(label: Text("Alamat Email")),
@@ -171,7 +170,7 @@ class _RegisterPageState extends State<RegisterPage> {
           onPressed: () async {
             if (formKey.currentState!.validate()) {
               UsahaModel dataUsaha = UsahaModel(
-                logoToko: pathFileLogo,
+                logoToko: pathFileLogo.isEmpty ? null : pathFileLogo,
                 namaUsaha: txtToko.text,
                 userName: txtOwner.text,
                 alamat: txtAlamat.text,
@@ -180,7 +179,7 @@ class _RegisterPageState extends State<RegisterPage> {
               log(dataUsaha.toMap().toString());
               if (await portalProv.submitRegister(dataUsaha)) {
                 if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, rtDashboard);
+                  Navigator.pushReplacementNamed(context, rtMainFrame);
                 }
               }
             }

@@ -11,5 +11,5 @@ const int appVersion = 1;
 // ====== Route Name ======
 const String rtLogin = "/login";
 const String rtRegister = "/register";
-const String rtDashboard = "/dashboard";
+const String rtMainFrame = "/mainframe";
 const String rtSplash = "/splash";

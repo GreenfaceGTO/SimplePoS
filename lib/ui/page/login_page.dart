@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simplepos/services/utils/constant.dart';
-import 'package:simplepos/ui/widget/public_widget.dart';
+import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

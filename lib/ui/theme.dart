@@ -67,6 +67,15 @@ class AppTema {
         ),
       ),
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      labelTextStyle: WidgetStatePropertyAll(TextStyle(fontSize: 10)),
+      iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
+        if (states.contains(WidgetState.selected)) {
+          return IconThemeData(color: clrPrimary, size: 22);
+        }
+        return IconThemeData(color: Colors.grey, size: 20);
+      }),
+    ),
 
     useMaterial3: true,
   );
