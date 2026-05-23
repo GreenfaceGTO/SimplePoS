@@ -13,3 +13,4 @@ const String rtLogin = "/login";
 const String rtRegister = "/register";
 const String rtMainFrame = "/mainframe";
 const String rtSplash = "/splash";
+const String rtMasterProduk = "/masterproduk";

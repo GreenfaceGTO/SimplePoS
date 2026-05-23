@@ -43,7 +43,9 @@ class TableScheme {
                       CONSTRAINT [id_header,id_item] UNIQUE,
     id_item   INTEGER REFERENCES tb_item (id),
     qty       INTEGER,
-    harga     REAL
+    harga     REAL,
+    diskon    REAL
 );
+
 ''';
 }

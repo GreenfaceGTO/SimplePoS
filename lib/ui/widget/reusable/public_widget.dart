@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:simplepos/main.dart';
 import 'package:simplepos/services/utils/enums.dart';
 
@@ -64,9 +65,7 @@ class PublicWidget {
     );
   }
 
-  // ---------------------------------------------
-  /// Mengambil gambar dari kamera atau gallery
-  // ---------------------------------------------
+  // ======== Mengambil gambar dari kamera atau gallery ===========
   static Future<File?> pickImage({
     ImageSource source = ImageSource.gallery,
   }) async {
@@ -84,9 +83,8 @@ class PublicWidget {
     return null;
   }
 
-  static void showMessage(
-  // BuildContext context
-  {
+  // ====== Widget penampil pesan toast (snackbar) ==========
+  static void showMessage({
     required String message,
     MessageMode mode = MessageMode.info,
     int durasi = 3,
@@ -118,4 +116,11 @@ class PublicWidget {
       ),
     );
   }
+
+  // =========Metode konversi angka ke rupiah=========
+  static NumberFormat toRupiah = NumberFormat.currency(
+    locale: 'ID',
+    symbol: "Rp. ",
+    decimalDigits: 2,
+  );
 }

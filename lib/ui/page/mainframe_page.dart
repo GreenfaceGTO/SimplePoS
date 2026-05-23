@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/providers/main_provider.dart';
+import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/widget/menudrawer.dart';
 
 class MainframePage extends StatefulWidget {
-  const MainframePage({super.key});
-
+  const MainframePage({super.key, required this.args});
+  final ArgsModel args;
   @override
   State<MainframePage> createState() => _MainframePageState();
 }
 
 class _MainframePageState extends State<MainframePage> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<MasterProvider>().loadDataUsaha();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<MainProvider>(

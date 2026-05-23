@@ -31,6 +31,17 @@ class _MenudrawerState extends State<Menudrawer> {
       icon: SvgPicture.asset("assets/svg/purchase.svg", width: 20, height: 20),
     ),
   ];
+
+  void onMenuTap(String menuName) {
+    switch (menuName) {
+      case "Master Produk":
+        Navigator.pushNamed(context, rtMasterProduk);
+
+        break;
+      default:
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mstProv = context.read<MasterProvider>();
@@ -56,7 +67,9 @@ class _MenudrawerState extends State<Menudrawer> {
               children: _lstMenu.map((menu) {
                 return ListTile(
                   visualDensity: VisualDensity.standard,
-                  onTap: () {},
+                  onTap: () {
+                    onMenuTap(menu.label);
+                  },
                   leading: menu.icon,
                   title: Text(menu.label),
                   trailing: Icon(Icons.chevron_right),
@@ -82,10 +95,19 @@ class _MenudrawerState extends State<Menudrawer> {
           mainAxisSize: MainAxisSize.min,
           children: [
             mstProv.dataUsaha!.logoToko != null
-                ? SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: Image.file(File(mstProv.dataUsaha!.logoToko!)),
+                ? Container(
+                    width: 80,
+                    height: 80,
+                    clipBehavior: Clip.antiAlias,
+
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      // BorderRadius.circular(8),
+                    ),
+                    child: Image.file(
+                      File(mstProv.dataUsaha!.logoToko!),
+                      fit: BoxFit.cover,
+                    ),
                   )
                 : CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,

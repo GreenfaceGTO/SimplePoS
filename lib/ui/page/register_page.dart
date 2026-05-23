@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/providers/portal_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
@@ -40,6 +41,16 @@ class _RegisterPageState extends State<RegisterPage> {
     bool result = emailRegEx.hasMatch(email);
     log(result.toString());
     return result;
+  }
+
+  @override
+  void dispose() {
+    txtToko.dispose();
+    txtAlamat.dispose();
+    txtOwner.dispose();
+    txtEmail.dispose();
+
+    super.dispose();
   }
 
   @override
@@ -179,7 +190,11 @@ class _RegisterPageState extends State<RegisterPage> {
               log(dataUsaha.toMap().toString());
               if (await portalProv.submitRegister(dataUsaha)) {
                 if (context.mounted) {
-                  Navigator.pushReplacementNamed(context, rtMainFrame);
+                  Navigator.pushReplacementNamed(
+                    context,
+                    rtMainFrame,
+                    arguments: ArgsModel(formMode: FormMode.view),
+                  );
                 }
               }
             }

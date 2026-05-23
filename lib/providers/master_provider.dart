@@ -13,11 +13,23 @@ class MasterProvider with ChangeNotifier {
   // =========getter=========
   UsahaModel? get dataUsaha => _dataUsaha;
 
+  // =========setter==========
+  void setUsahaData(UsahaModel data) {
+    _dataUsaha = data;
+    notifyListeners();
+  }
+
   // =========inisialisasi provider=========
   Future<void> init() async {
     if (_initialized) return;
-    _dataUsaha = await _masterDataRepo.getDataUsaha();
+    // TODO: semua master load disini
+
     _initialized = true;
+    notifyListeners();
+  }
+
+  Future<void> loadDataUsaha() async {
+    _dataUsaha = await _masterDataRepo.getDataUsaha();
     notifyListeners();
   }
 }

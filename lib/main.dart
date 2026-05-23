@@ -6,12 +6,14 @@ import 'package:simplepos/services/utils/preferences.dart';
 import 'package:simplepos/services/utils/routes.dart';
 import 'package:simplepos/ui/page/splashscreen_page.dart';
 import 'package:simplepos/ui/theme.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await initializeDateFormatting('id_ID', null);
   await Preference().init();
   runApp(const MyApp());
 }
