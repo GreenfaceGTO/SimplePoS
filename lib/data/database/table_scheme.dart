@@ -1,6 +1,7 @@
 class TableScheme {
   static const tbUsaha = "tb_usaha";
   static const tbItem = "tb_item";
+  static const tbItemSat = "tb_itemsat";
   static const tbTranshd = "tb_transhd";
   static const tbTransdt = "tb_transdt";
 
@@ -21,9 +22,19 @@ class TableScheme {
     nama_item TEXT    CONSTRAINT nama_item UNIQUE,
     barcode   TEXT    UNIQUE,
     tag       TEXT,
-    harga     REAL,
     stok      INTEGER
 );
+''';
+
+  static const createTbItemSat = '''CREATE TABLE $tbItemSat (
+    id          INTEGER   PRIMARY KEY,
+    id_produk   INTEGER   REFERENCES tb_item (id) ON UPDATE CASCADE,
+    satuan      TEXT (10) CONSTRAINT [id_produk,satuan] UNIQUE,
+    tipe        TEXT (1)  CHECK (tipe IN ('D', 'K') ),
+    harga       REAL,
+    pot_kemasan REAL
+);
+
 ''';
 
   static const createTbTranshd = '''CREATE TABLE $tbTranshd (

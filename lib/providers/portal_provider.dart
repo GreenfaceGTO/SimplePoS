@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
+import 'package:simplepos/data/database/dao/produk_dao.dart';
 import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/data/repository/masterdata_repo.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
@@ -8,7 +9,10 @@ import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class PortalProvider with ChangeNotifier {
-  final MasterdataRepo _masterdataRepo = MasterdataRepo(usahaDao: UsahaDao());
+  final MasterdataRepo _masterdataRepo = MasterdataRepo(
+    usahaDao: UsahaDao(),
+    produkDao: ProdukDao(),
+  );
   // ====== Loading Status =======
   bool _isLoading = false;
   bool get isLoading => _isLoading;
