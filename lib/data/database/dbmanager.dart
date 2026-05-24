@@ -30,6 +30,7 @@ class Dbmanager {
     log("Membuat struktur database...");
     await db.execute(TableScheme.createTbUsaha);
     await db.execute(TableScheme.createTbItem);
+    await db.execute(TableScheme.createTbItemSat);
     await db.execute(TableScheme.createTbTranshd);
     await db.execute(TableScheme.createTbTransdt);
   }

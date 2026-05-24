@@ -1,4 +1,4 @@
-enum FormMode { input, view, update }
+enum FormMode { input, view, update, browse }
 
 enum ButtonType { elevated, outlined, text }
 

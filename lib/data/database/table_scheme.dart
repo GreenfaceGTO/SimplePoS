@@ -20,21 +20,21 @@ class TableScheme {
   static const createTbItem = '''CREATE TABLE $tbItem (
     id        INTEGER PRIMARY KEY,
     nama_item TEXT    CONSTRAINT nama_item UNIQUE,
-    barcode   TEXT    UNIQUE,
     tag       TEXT,
     stok      INTEGER
 );
+
 ''';
 
   static const createTbItemSat = '''CREATE TABLE $tbItemSat (
     id          INTEGER   PRIMARY KEY,
     id_produk   INTEGER   REFERENCES tb_item (id) ON UPDATE CASCADE,
     satuan      TEXT (10) CONSTRAINT [id_produk,satuan] UNIQUE,
+    barcode     TEXT      UNIQUE,
     tipe        TEXT (1)  CHECK (tipe IN ('D', 'K') ),
     harga       REAL,
     pot_kemasan REAL
 );
-
 ''';
 
   static const createTbTranshd = '''CREATE TABLE $tbTranshd (

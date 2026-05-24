@@ -14,3 +14,6 @@ const String rtRegister = "/register";
 const String rtMainFrame = "/mainframe";
 const String rtSplash = "/splash";
 const String rtMasterProduk = "/masterproduk";
+
+const String rtFormKatalogProduk = "formkatalogproduk";
+const String rtMasterKategori = "/masterkategori";

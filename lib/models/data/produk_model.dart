@@ -3,7 +3,6 @@ import 'dart:convert';
 class ProdukModel {
   int? id;
   String? namaProduk;
-  String? barcode;
   List<String>? tag;
   double? stok;
   List<ProdukSatModel> lstSatuan;
@@ -11,8 +10,7 @@ class ProdukModel {
   ProdukModel({
     this.id,
     this.namaProduk,
-    this.barcode,
-    this.tag,
+    this.tag = const [],
     this.stok,
     this.lstSatuan = const [],
   });
@@ -20,7 +18,6 @@ class ProdukModel {
   factory ProdukModel.fromMap(Map<String, dynamic> map) => ProdukModel(
     id: map['id'],
     namaProduk: map['nama_item'],
-    barcode: map['barcode'],
     tag: List.from(jsonDecode(map['tag'])),
     stok: map['stok'],
     lstSatuan: map['satuan'] != null
@@ -33,7 +30,6 @@ class ProdukModel {
   Map<String, dynamic> toMap() => {
     "id": id,
     "nama_item": namaProduk,
-    "barcode": barcode,
     "tag": jsonEncode(tag),
     "stok": stok,
     "satuan": jsonEncode(lstSatuan.map((e) => e.toMap()).toList()),
@@ -44,6 +40,7 @@ class ProdukSatModel {
   int? id;
   int? idProduk;
   String? satuan;
+  String? barcode;
   double? harga;
   double? diskon;
 
@@ -51,6 +48,7 @@ class ProdukSatModel {
     this.id,
     this.idProduk,
     this.satuan,
+    this.barcode,
     this.harga,
     this.diskon,
   });
@@ -59,6 +57,7 @@ class ProdukSatModel {
     id: map['id'],
     idProduk: map['id_produk'],
     satuan: map['satuan'],
+    barcode: map['barcode'],
     harga: map['harga'],
     diskon: map['diskon'],
   );
@@ -67,6 +66,7 @@ class ProdukSatModel {
     "id": id,
     "id_produk": idProduk,
     "satuan": satuan,
+    "barcode": barcode,
     "harga": harga,
     "dusko": diskon,
   };

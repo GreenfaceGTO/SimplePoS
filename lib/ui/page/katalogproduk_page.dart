@@ -1,23 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
+import 'package:simplepos/services/utils/constant.dart';
+import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 
-class MasterprodukPage extends StatefulWidget {
-  const MasterprodukPage({super.key});
+class KatalogProdukPage extends StatefulWidget {
+  const KatalogProdukPage({super.key});
 
   @override
-  State<MasterprodukPage> createState() => _MasterprodukPageState();
+  State<KatalogProdukPage> createState() => _KatalogProdukPageState();
 }
 
-class _MasterprodukPageState extends State<MasterprodukPage> {
+class _KatalogProdukPageState extends State<KatalogProdukPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Master Produk")),
+      appBar: AppBar(title: Text("Katalog Produk")),
       floatingActionButton: FloatingActionButton(
         heroTag: "masterproduk",
-        onPressed: () {},
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            rtFormKatalogProduk,
+            arguments: ArgsModel(formMode: FormMode.input),
+          );
+        },
         child: Icon(Icons.add),
       ),
       body: Consumer<MasterProvider>(

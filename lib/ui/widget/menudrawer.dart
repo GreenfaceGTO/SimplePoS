@@ -19,8 +19,8 @@ class Menudrawer extends StatefulWidget with CacheManager {
 class _MenudrawerState extends State<Menudrawer> {
   final List<MenuModel> _lstMenu = [
     MenuModel(
-      label: "Master Produk",
-      icon: SvgPicture.asset("assets/svg/stock.svg", width: 20, height: 20),
+      label: "Katalog Produk",
+      icon: SvgPicture.asset("assets/svg/katalog.svg", width: 20, height: 20),
     ),
     MenuModel(
       label: "Stok Opname",
@@ -34,7 +34,7 @@ class _MenudrawerState extends State<Menudrawer> {
 
   void onMenuTap(String menuName) {
     switch (menuName) {
-      case "Master Produk":
+      case "Katalog Produk":
         Navigator.pushNamed(context, rtMasterProduk);
 
         break;
