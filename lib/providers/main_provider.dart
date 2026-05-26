@@ -1,33 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:simplepos/models/menu_model.dart';
-import 'package:simplepos/ui/tab_page/cart_tabpage.dart';
-import 'package:simplepos/ui/tab_page/dashboard_tabpage.dart';
-import 'package:simplepos/ui/tab_page/history_tabpage.dart';
-import 'package:simplepos/ui/tab_page/produk_tabpage.dart';
+import 'package:simplepos/services/utils/enums.dart';
 
 class MainProvider with ChangeNotifier {
+  /// index halaman bottom navbar
   int _currentPage = 0;
 
+  /// getter index halaman bottom navbar
   int get currentPage => _currentPage;
 
+  /// setter index halaman bottom navbar
   void setPage(int index) {
     _currentPage = index;
     notifyListeners();
   }
 
-  // ======Daftar Halaman Main======
-  List<Widget> lstMainPage = [
-    DashboardTabpage(),
-    ProdukTabpage(),
-    CartTabpage(),
-    HistoryTabpage(),
-  ];
+  /// mode halaman produk
+  ProdukPageMode _produkPageMode = ProdukPageMode.browser;
 
-  // ======Daftar menu bawah=======
-  List<MenuModel> lstBottomMenu = [
-    MenuModel(label: "Dashboard", icon: Icon(Icons.dashboard)),
-    MenuModel(label: "Produk", icon: Icon(Icons.inventory)),
-    MenuModel(label: "Keranjang", icon: Icon(Icons.shopping_cart)),
-    MenuModel(label: "Riwayat", icon: Icon(Icons.history)),
-  ];
+  /// getter mode halaman produk
+  ProdukPageMode get produkPageMode => _produkPageMode;
+
+  /// setter mode halaman produk
+  void setProdukPageMode(ProdukPageMode mode) {
+    _produkPageMode = mode;
+    notifyListeners();
+  }
 }

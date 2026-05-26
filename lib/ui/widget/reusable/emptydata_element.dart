@@ -27,6 +27,7 @@ class EmptydataElement extends StatelessWidget {
           style: tema.textTheme.bodyMedium!.copyWith(
             fontWeight: FontWeight.w300,
           ),
+          textAlign: TextAlign.center,
         ),
       ],
     );

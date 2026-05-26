@@ -17,3 +17,26 @@ extension DateTimeExtension on DateTime {
     }
   }
 }
+
+extension StringExtension on String {
+  // ------------------------------------------------------------------
+  /// merubah huruf diawal kata pertama dalam kalimat menjadi capital
+  // ------------------------------------------------------------------
+  String capitalizeFirst() {
+    if (isEmpty) return this;
+    return this[0].toUpperCase() + substring(1);
+  }
+
+  // -----------------------------------------------------------
+  /// merubah setiap huruf awal dalam kalimat menjadi capital
+  // -----------------------------------------------------------
+  String capitalizeEachWord() {
+    if (isEmpty) return this;
+    return split(' ')
+        .map(
+          (word) =>
+              word.isEmpty ? word : word[0].toUpperCase() + word.substring(1),
+        )
+        .join(' ');
+  }
+}

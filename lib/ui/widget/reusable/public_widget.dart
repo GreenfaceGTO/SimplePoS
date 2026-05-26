@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:simplepos/main.dart';
 import 'package:simplepos/services/utils/enums.dart';
+import 'package:simplepos/services/utils/inputformater.dart';
 
 class PublicWidget {
   // ====== Widget Logo Aplikasi ======
@@ -123,4 +124,37 @@ class PublicWidget {
     symbol: "Rp. ",
     decimalDigits: 2,
   );
+
+  static Future<String?> showRefForm(
+    BuildContext context, {
+    required String title,
+  }) async {
+    TextEditingController txtRef = TextEditingController();
+    return showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(title),
+          content: TextFormField(
+            controller: txtRef,
+            autofocus: true,
+            inputFormatters: [CapitalizeEachWord()],
+            keyboardType: TextInputType.name,
+            textInputAction: TextInputAction.done,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (txtRef.text.isNotEmpty) {
+                  Navigator.pop(ctx, txtRef.text);
+                }
+              },
+              child: const Text("SIMPAN"),
+            ),
+          ],
+        );
+      },
+      barrierDismissible: true,
+    );
+  }
 }

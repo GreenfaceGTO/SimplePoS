@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/menu_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
@@ -31,6 +33,7 @@ class _MenudrawerState extends State<Menudrawer> {
       icon: SvgPicture.asset("assets/svg/purchase.svg", width: 20, height: 20),
     ),
   ];
+  bool isLogoFileExist = false;
 
   void onMenuTap(String menuName) {
     switch (menuName) {
@@ -40,6 +43,18 @@ class _MenudrawerState extends State<Menudrawer> {
         break;
       default:
     }
+  }
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final dataUsaha = context.read<MasterProvider>().dataUsaha;
+      if (dataUsaha != null) {
+        String pathFile = dataUsaha.logoToko!;
+        isLogoFileExist = await File(pathFile).exists();
+      }
+    });
+    super.initState();
   }
 
   @override
@@ -94,7 +109,7 @@ class _MenudrawerState extends State<Menudrawer> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            mstProv.dataUsaha!.logoToko != null
+            isLogoFileExist
                 ? Container(
                     width: 80,
                     height: 80,
@@ -109,14 +124,25 @@ class _MenudrawerState extends State<Menudrawer> {
                       fit: BoxFit.cover,
                     ),
                   )
-                : CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    maxRadius: 40,
-                    child: Icon(
-                      Icons.storefront,
-                      size: 50,
-                      color: Colors.white,
-                    ),
+                : Stack(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        maxRadius: 40,
+                        child: Icon(
+                          Icons.storefront,
+                          size: 50,
+                          color: Colors.white,
+                        ),
+                      ),
+                      mstProv.dataUsaha!.logoToko != null
+                          ? Positioned(
+                              bottom: 5,
+                              right: 5,
+                              child: Icon(Symbols.info, color: Colors.yellow),
+                            )
+                          : SizedBox(),
+                    ],
                   ),
             PublicWidget.spasi(),
             Text(

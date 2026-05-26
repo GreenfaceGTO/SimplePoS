@@ -16,11 +16,13 @@ class MasterProvider with ChangeNotifier {
   UsahaModel? _dataUsaha;
   List<ProdukModel> _daftarProduk = [];
   List<String> _daftarKategori = [];
+  List<String> _daftarSatuan = [];
 
   // =========getter=========
   UsahaModel? get dataUsaha => _dataUsaha;
   List<ProdukModel> get daftarProduk => _daftarProduk;
   List<String> get daftarKategori => _daftarKategori;
+  List<String> get daftarSatuan => _daftarSatuan;
 
   // =========setter==========
   void setUsahaData(UsahaModel data) {
@@ -28,12 +30,16 @@ class MasterProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void addNewKategori(String value) {}
+
   // =========inisialisasi provider=========
   Future<void> init() async {
     if (_initialized) return;
     // TODO: semua master load disini
     _daftarProduk = await _masterDataRepo.fetchAllProduk();
     _daftarKategori = await buildKategoriList();
+
+    _daftarSatuan = await buildSatuanList();
     _initialized = true;
     notifyListeners();
   }
@@ -54,6 +60,19 @@ class MasterProvider with ChangeNotifier {
           if (!result.contains(kat)) {
             result.add(kat);
           }
+        }
+      }
+    }
+    return result;
+  }
+
+  // ========= Mengumpulkan data satuan dari data produk ==============
+  Future<List<String>> buildSatuanList() async {
+    List<String> result = [];
+    for (var item in daftarProduk) {
+      for (var sat in item.lstSatuan) {
+        if (!_daftarSatuan.contains(sat.satuan)) {
+          result.add(sat.satuan!);
         }
       }
     }
