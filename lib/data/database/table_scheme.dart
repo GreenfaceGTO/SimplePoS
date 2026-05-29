@@ -30,9 +30,11 @@ class TableScheme {
     id          INTEGER   PRIMARY KEY,
     id_produk   INTEGER   REFERENCES tb_item (id) ON UPDATE CASCADE,
     satuan      TEXT (10) CONSTRAINT [id_produk,satuan] UNIQUE,
+    isi         INTEGER,
     barcode     TEXT      UNIQUE,
     tipe        TEXT (1)  CHECK (tipe IN ('D', 'K') ),
-    harga       REAL,
+    h_pokok     REAL,
+    h_jual      REAL,
     pot_kemasan REAL
 );
 ''';

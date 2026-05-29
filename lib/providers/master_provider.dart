@@ -4,6 +4,8 @@ import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/data/repository/masterdata_repo.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
+import 'package:simplepos/services/utils/enums.dart';
+import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class MasterProvider with ChangeNotifier {
   final _masterDataRepo = MasterdataRepo(
@@ -30,7 +32,33 @@ class MasterProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void addNewKategori(String value) {}
+  void addNewKategori(String value) {
+    if (!_daftarKategori.contains(value)) {
+      _daftarKategori.add(value);
+      _daftarKategori.sort((a, b) => a.compareTo(b));
+      notifyListeners();
+    } else {
+      PublicWidget.showMessage(
+        message: "Kategori sudah ada",
+        mode: MessageMode.error,
+      );
+    }
+  }
+
+  Future<bool> addNewSatuan(String value) async {
+    if (!_daftarSatuan.contains(value)) {
+      _daftarSatuan.add(value);
+      _daftarSatuan.sort((a, b) => a.compareTo(b));
+      notifyListeners();
+      return true;
+    } else {
+      PublicWidget.showMessage(
+        message: "Satuan sudah ada",
+        mode: MessageMode.error,
+      );
+      return false;
+    }
+  }
 
   // =========inisialisasi provider=========
   Future<void> init() async {

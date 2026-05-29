@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:simplepos/main.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
@@ -14,18 +15,6 @@ class PublicWidget {
     height: size * 0.5,
     child: Image.asset("assets/mbspos.png", fit: BoxFit.cover),
   );
-
-  // ====== Widget Spasi ======
-  static Widget spasi({
-    OrientationMode mode = OrientationMode.vertical,
-    double jarak = 8,
-  }) {
-    if (mode == OrientationMode.horizontal) {
-      return SizedBox(width: jarak, height: 0);
-    } else {
-      return SizedBox(height: jarak, width: 0);
-    }
-  }
 
   // ====== Widget bottomsheet opsi sumber pengambilan gambar ======
   static Future<ImageSource?> showImageSourceOption(
@@ -125,6 +114,7 @@ class PublicWidget {
     decimalDigits: 2,
   );
 
+  // ====== Jendela dialog input referensi kategori & satuan
   static Future<String?> showRefForm(
     BuildContext context, {
     required String title,
@@ -156,5 +146,28 @@ class PublicWidget {
       },
       barrierDismissible: true,
     );
+  }
+
+  // ============Metode scan barcode============
+  static Future<String?> scanBarcode(BuildContext context) async {
+    String? result = await SimpleBarcodeScanner.scanBarcode(
+      context,
+      barcodeAppBar: const BarcodeAppBar(
+        appBarTitle: "Scan barcode",
+        centerTitle: false,
+        enableBackButton: true,
+        backButtonIcon: Icon(Icons.chevron_left),
+      ),
+      isShowFlashIcon: true,
+      cancelButtonText: "BATAL",
+      delayMillis: 500,
+      cameraFace: CameraFace.back,
+      scanFormat: ScanFormat.ONLY_BARCODE,
+    );
+
+    if (result != null && result != '-1') {
+      return result;
+    }
+    return null;
   }
 }

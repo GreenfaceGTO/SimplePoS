@@ -10,6 +10,7 @@ import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/providers/portal_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
+import 'package:simplepos/services/utils/inputformater.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -93,20 +94,22 @@ class _RegisterPageState extends State<RegisterPage> {
           children: [
             Text("Registrasi Toko", style: tema.titleMedium),
             Text("Lengkapi detail profil bisnis Anda untuk memulai."),
-            PublicWidget.spasi(jarak: 24),
+            SizedBox(height: 24),
             _photoFrame(context, tema),
-            PublicWidget.spasi(jarak: 24),
+            SizedBox(height: 24),
             TextFormField(
               controller: txtToko,
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
+              inputFormatters: [CapitalizeEachWord()],
               decoration: InputDecoration(label: Text("Nama Toko")),
               validator: (val) {
                 if (val!.isEmpty) return "Wajib diisi";
                 return null;
               },
             ),
-            PublicWidget.spasi(),
+
+            SizedBox(height: 8),
             TextFormField(
               controller: txtAlamat,
               textInputAction: TextInputAction.next,
@@ -114,18 +117,19 @@ class _RegisterPageState extends State<RegisterPage> {
               maxLines: 3,
               decoration: InputDecoration(label: Text("Alamat")),
             ),
-            PublicWidget.spasi(),
+            SizedBox(height: 8),
             TextFormField(
               controller: txtOwner,
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(label: Text("Nama Pemilik")),
+              inputFormatters: [CapitalizeEachWord()],
               validator: (val) {
                 if (val!.isEmpty) return "Wajib diisi";
                 return null;
               },
             ),
-            PublicWidget.spasi(),
+            SizedBox(height: 8),
             TextFormField(
               controller: txtEmail,
               keyboardType: TextInputType.emailAddress,
@@ -140,9 +144,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 return null;
               },
             ),
-            PublicWidget.spasi(jarak: 30),
+            SizedBox(height: 30),
             _tombolDaftar(context),
-            PublicWidget.spasi(jarak: 12),
+            SizedBox(height: 12),
             Text.rich(
               TextSpan(
                 text:
@@ -230,7 +234,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.add_a_photo, color: Colors.grey),
-                            PublicWidget.spasi(),
+                            SizedBox(height: 8),
                             Text("Logo Toko"),
                           ],
                         ),

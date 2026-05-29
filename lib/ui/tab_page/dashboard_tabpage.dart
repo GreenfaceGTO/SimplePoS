@@ -131,7 +131,7 @@ class _DashboardTabpageState extends State<DashboardTabpage> {
                     ),
                   ],
                 ),
-                PublicWidget.spasi(),
+                SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(border: Border.all()),
                   width: double.infinity,
@@ -179,7 +179,7 @@ class _DashboardTabpageState extends State<DashboardTabpage> {
               trailling ?? SizedBox(),
             ],
           ),
-          PublicWidget.spasi(jarak: 10),
+          SizedBox(height: 10),
           Text(title),
           child,
         ],

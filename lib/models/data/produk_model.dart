@@ -40,34 +40,46 @@ class ProdukSatModel {
   int? id;
   int? idProduk;
   String? satuan;
+  int isi;
   String? barcode;
-  double? harga;
-  double? diskon;
+  double? hPokok;
+  double? hJual;
+  double diskon;
+  int? stok;
 
   ProdukSatModel({
     this.id,
     this.idProduk,
     this.satuan,
+    this.isi = 0,
     this.barcode,
-    this.harga,
-    this.diskon,
+    this.hPokok,
+    this.hJual,
+    this.diskon = 0,
+    this.stok,
   });
 
   factory ProdukSatModel.fromMap(Map<String, dynamic> map) => ProdukSatModel(
     id: map['id'],
     idProduk: map['id_produk'],
     satuan: map['satuan'],
+    isi: map['isi'],
     barcode: map['barcode'],
-    harga: map['harga'],
-    diskon: map['diskon'],
+    hPokok: map['h_pokok'],
+    hJual: map['h_jual'],
+    diskon: map['pot_kemasan'],
+    stok: map['stok'],
   );
 
   Map<String, dynamic> toMap() => {
     "id": id,
     "id_produk": idProduk,
     "satuan": satuan,
+    "isi": isi,
     "barcode": barcode,
-    "harga": harga,
-    "dusko": diskon,
+    "h_pokok": hPokok,
+    "h_jual": hJual,
+    "pot_kemasan": diskon,
+    "stok": stok,
   };
 }

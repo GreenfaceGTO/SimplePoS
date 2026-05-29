@@ -15,23 +15,16 @@ class _KategoriPageState extends State<KategoriPage> {
   /// variabel untuk menyalin data kategori yang dikumpulkan provider dari data produk.
   /// data pada variabel ini nantinya akan disatukan dengan data dari widget.currentTag
   /// yang dikirim dari halaman pemanggil.
-  List<String> localKategori = [];
 
   /// variabel penampung kategori yang dipilih.
   List<String> selectedTag = [];
 
   @override
   void initState() {
-    localKategori.addAll(context.read<MasterProvider>().daftarKategori);
     if (widget.currentTag.isNotEmpty) {
       selectedTag.addAll(widget.currentTag);
-      for (var kat in widget.currentTag) {
-        if (!localKategori.contains(kat)) {
-          localKategori.add(kat);
-        }
-      }
     }
-    localKategori.sort((a, b) => a.compareTo(b));
+
     super.initState();
   }
 
@@ -60,20 +53,17 @@ class _KategoriPageState extends State<KategoriPage> {
                 title: "Kategori",
               );
               if (kat != null) {
-                if (!localKategori.contains(kat)) {
-                  setState(() {
-                    localKategori.add(kat);
-                    localKategori.sort((a, b) => a.compareTo(b));
-                  });
+                if (!prov.daftarKategori.contains(kat)) {
+                  prov.addNewKategori(kat);
                 }
               }
             },
             child: Icon(Icons.add),
           ),
-          body: localKategori.isEmpty
+          body: prov.daftarKategori.isEmpty
               ? Center(child: EmptydataElement())
               : ListView(
-                  children: localKategori.map((kat) {
+                  children: prov.daftarKategori.map((kat) {
                     return CheckboxListTile(
                       controlAffinity: ListTileControlAffinity.leading,
                       value: selectedTag.contains(kat),

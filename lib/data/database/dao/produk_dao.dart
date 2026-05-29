@@ -3,6 +3,27 @@ import 'package:simplepos/data/database/table_scheme.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 
 class ProdukDao {
+  // ======Menambahkan produk baru=========
+  Future<ProdukModel> addNewProduk(ProdukModel data) async {
+    final db = await Dbmanager.database;
+    try {
+      return db.transaction<ProdukModel>((txn) async {
+        final idProduk = await txn.insert(TableScheme.tbItem, data.toMap());
+        data.id = idProduk;
+
+        // insert data satuan
+        for (var sat in data.lstSatuan) {
+          sat.idProduk = idProduk;
+          final satId = await txn.insert(TableScheme.tbItemSat, sat.toMap());
+          sat.id = satId;
+        }
+        return data;
+      });
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // =======Mengambil daftar produk=======
   Future<List<ProdukModel>> fetchProduk() async {
     final db = await Dbmanager.database;

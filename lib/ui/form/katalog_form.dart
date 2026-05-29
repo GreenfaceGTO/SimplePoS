@@ -23,9 +23,10 @@ class _KatalogFormState extends State<KatalogForm> {
   final TextEditingController txtNama = TextEditingController();
 
   ProdukSatModel? satDasar;
+  List<ProdukSatModel> satLain = [];
   List<String> lstKategori = [];
 
-  Widget spasi = PublicWidget.spasi();
+  // Widget spasi = PublicWidget.spasi();
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -39,7 +40,7 @@ class _KatalogFormState extends State<KatalogForm> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: Text("Konfirm"),
+          title: Text("Konfirmasi"),
           content: Text(
             "Kategori $kat ingin dihapus?",
             style: Theme.of(ctx).textTheme.bodyLarge,
@@ -68,6 +69,69 @@ class _KatalogFormState extends State<KatalogForm> {
     }
   }
 
+  void deleteSatuan(ProdukSatModel satuan) async {
+    bool? confirm = await showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text("Konfirmasi"),
+          content: Text("Satuan ${satuan.satuan} ingin dihapus?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx, true);
+              },
+              child: Text("HAPUS"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx, false);
+              },
+              child: Text("BATAL"),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirm != null && confirm) {
+      setState(() {
+        if (satuan.isi > 1) {
+          satLain.removeWhere((e) => e.satuan == satuan.satuan);
+        } else {
+          satDasar = null;
+        }
+      });
+    }
+  }
+
+  void validateForm() {
+    if (satDasar == null) {
+      PublicWidget.showMessage(
+        message: "Satuan belum ditentukan",
+        mode: MessageMode.warning,
+      );
+    } else if (lstKategori.isEmpty) {
+      PublicWidget.showMessage(
+        message: "Setidaknya tentukan 1 kategori",
+        mode: MessageMode.warning,
+      );
+    } else if (formKey.currentState!.validate()) {
+      List<ProdukSatModel> sat = [satDasar!];
+      for (var satkov in satLain) {
+        if (!sat.contains(satkov)) {
+          sat.add(satkov);
+        }
+      }
+      ProdukModel newProduk = ProdukModel(
+        namaProduk: txtNama.text,
+        tag: lstKategori,
+        stok: double.parse(satDasar!.stok.toString()),
+        lstSatuan: sat,
+      );
+      log(newProduk.toMap().toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData tema = Theme.of(context);
@@ -81,7 +145,9 @@ class _KatalogFormState extends State<KatalogForm> {
         actions: [
           IconButton(
             tooltip: "Simpan",
-            onPressed: () {},
+            onPressed: () {
+              validateForm();
+            },
             icon: Icon(Icons.save),
           ),
         ],
@@ -104,9 +170,10 @@ class _KatalogFormState extends State<KatalogForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text("Informasi Umum", style: tema.textTheme.titleMedium),
-                      spasi,
-                      spasi,
+                      SizedBox(height: 16),
+
                       TextFormField(
+                        autofocus: true,
                         controller: txtNama,
                         onChanged: (val) {
                           setState(() {});
@@ -116,60 +183,255 @@ class _KatalogFormState extends State<KatalogForm> {
                           label: Text("Nama Produk"),
                           hintText: "Masukkan nama produk",
                         ),
+                        validator: (val) {
+                          if (val!.isEmpty) return "Wajib diisi";
+                          return null;
+                        },
                       ),
-                      spasi,
+                      SizedBox(height: 8),
                       _tagKategori(tema),
                     ],
                   ),
                 ),
-                spasi,
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black38, width: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                SizedBox(height: 8),
+                _satuanSection(tema, context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container _satuanSection(ThemeData tema, BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black38, width: 0.5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Satuan & Harga", style: tema.textTheme.titleMedium),
+          SizedBox(height: 16),
+
+          satDasar == null
+              ? _noSatDasarWidget(context)
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _satDasar(tema),
+                    Divider(),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (satLain.isNotEmpty)
+                          ...satLain.map((e) {
+                            return _satuanLainCard(tema, e);
+                          }),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: SizedBox(
+                            height: 45,
+                            child: OutlinedButton(
+                              onPressed: () async {
+                                ProdukSatModel? satKonv =
+                                    await Navigator.pushNamed(
+                                      context,
+                                      rtFormSatuan,
+                                      arguments: ArgsModel(
+                                        formMode: FormMode.input,
+                                        data: {
+                                          "nama_item": txtNama.text,
+                                          "sat_dasar": satDasar,
+                                        },
+                                      ),
+                                    );
+                                if (satKonv != null) {
+                                  setState(() {
+                                    satLain.add(satKonv);
+                                  });
+                                }
+                              },
+                              child: Text("Satuan Lainnya"),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+        ],
+      ),
+    );
+  }
+
+  Container _satuanLainCard(ThemeData tema, ProdukSatModel e) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.blueGrey.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(vertical: 2),
+            leading: Icon(Icons.compare_arrows_outlined),
+            title: Text(
+              "${e.satuan} (${e.isi} ${satDasar!.satuan!})",
+              style: tema.textTheme.titleSmall,
+            ),
+            trailing: IconButton(
+              onPressed: () {
+                deleteSatuan(e);
+              },
+              icon: Icon(
+                Icons.delete_forever_outlined,
+                size: 18,
+                color: Colors.red,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Satuan & Harga", style: tema.textTheme.titleMedium),
-                      spasi,
-                      spasi,
-                      satDasar == null
-                          ? SizedBox(
-                              height: 45,
-                              child: OutlinedButton.icon(
-                                onPressed: txtNama.text.isNotEmpty
-                                    ? () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          rtFormSatuan,
-                                          arguments: ArgsModel(
-                                            formMode: FormMode.input,
-                                            data: {
-                                              "nama_item": txtNama.text,
-                                              "sat_dasar": null,
-                                            },
-                                          ),
-                                        );
-                                      }
-                                    : null,
-                                label: Text("Satuan Dasar"),
-                                icon: Icon(Icons.add),
-                              ),
-                            )
-                          : Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [Text("Satuan Lain")],
-                            ),
+                      Text("Harga Pokok"),
+                      Text(
+                        PublicWidget.toRupiah.format(e.hPokok),
+                        style: tema.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Harga Jual"),
+                      Text(
+                        PublicWidget.toRupiah.format(e.hJual),
+                        style: tema.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Container _satDasar(ThemeData tema) {
+    return Container(
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.teal.shade50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(vertical: 2),
+            leading: Icon(Symbols.filter_1),
+            title: Text(satDasar!.satuan!, style: tema.textTheme.titleSmall),
+            subtitle: Text("Satuan Dasar"),
+            trailing: satLain.isEmpty
+                ? IconButton(
+                    onPressed: () {
+                      deleteSatuan(satDasar!);
+                    },
+                    icon: Icon(
+                      Icons.delete_forever_outlined,
+                      size: 18,
+                      color: Colors.red,
+                    ),
+                  )
+                : null,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 40),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Harga Pokok"),
+                      Text(
+                        PublicWidget.toRupiah.format(satDasar!.hPokok),
+                        style: tema.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Harga Jual"),
+                      Text(
+                        PublicWidget.toRupiah.format(satDasar!.hJual),
+                        style: tema.textTheme.bodyMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  SizedBox _noSatDasarWidget(BuildContext context) {
+    return SizedBox(
+      height: 45,
+      child: OutlinedButton.icon(
+        onPressed: txtNama.text.isNotEmpty
+            ? () async {
+                ProdukSatModel? satuan = await Navigator.pushNamed(
+                  context,
+                  rtFormSatuan,
+                  arguments: ArgsModel(
+                    formMode: FormMode.input,
+                    data: {"nama_item": txtNama.text, "sat_dasar": null},
+                  ),
+                );
+                if (satuan != null) {
+                  setState(() {
+                    satDasar = satuan;
+                  });
+                }
+              }
+            : null,
+        label: Text("Satuan Dasar"),
+        icon: Icon(Icons.add),
       ),
     );
   }
@@ -261,118 +523,4 @@ class _KatalogFormState extends State<KatalogForm> {
       ),
     );
   }
-
-  Container _satuanLain(ThemeData tema) {
-    return Container(
-      constraints: BoxConstraints(minHeight: 100),
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black54, width: 0.5),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(4),
-          topRight: Radius.circular(4),
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            color: tema.primaryColor,
-            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "Satuan Lainnya",
-                    style: tema.textTheme.bodyLarge!.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: EmptydataElement(
-                iconSize: 30,
-                caption: "Belum ada satuan lain",
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Row _satuanDasar(ThemeData tema) {
-  //   return Row(
-  //     children: [
-  //       Expanded(
-  //         flex: 7,
-  //         child: Container(
-  //           height: 48,
-  //           padding: EdgeInsets.fromLTRB(12, 0, 0, 0),
-  //           decoration: BoxDecoration(
-  //             border: Border.all(color: Colors.black54),
-  //             borderRadius: BorderRadius.circular(4),
-  //           ),
-  //           child: Row(
-  //             children: [
-  //               Expanded(
-  //                 child: Consumer<MasterProvider>(
-  //                   builder: (context, prov, _) {
-  //                     return DropdownButton(
-  //                       value: satDasar,
-  //                       underline: SizedBox(),
-  //                       isExpanded: true,
-  //                       items: prov.daftarSatuan.map((sat) {
-  //                         return DropdownMenuItem(
-  //                           child: ListTile(title: Text(sat)),
-  //                         );
-  //                       }).toList(),
-  //                       onChanged: (val) {},
-  //                       hint: Text(
-  //                         "Satuan Dasar",
-  //                         style: tema.textTheme.bodyLarge!.copyWith(
-  //                           color: Colors.black87,
-  //                         ),
-  //                       ),
-  //                     );
-  //                   },
-  //                 ),
-  //               ),
-  //               IconButton(
-  //                 onPressed: () {},
-  //                 icon: Icon(
-  //                   Icons.add_circle_outline,
-  //                   size: 18,
-  //                   color: tema.primaryColor,
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       ),
-  //       PublicWidget.spasi(mode: OrientationMode.horizontal),
-  //       Expanded(
-  //         flex: 3,
-  //         child: TextField(
-  //           decoration: InputDecoration(label: Text("Stok Awal")),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 }

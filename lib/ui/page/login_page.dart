@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:simplepos/services/utils/constant.dart';
-import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -33,15 +32,15 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Text("Login", style: tema.textTheme.titleMedium),
                   Text("Silahkan masukkan data login Anda."),
-                  PublicWidget.spasi(jarak: 30),
+                  SizedBox(height: 30),
                   TextFormField(
                     decoration: InputDecoration(label: Text("Email Toko")),
                   ),
-                  PublicWidget.spasi(),
+                  SizedBox(height: 8),
                   TextFormField(
                     decoration: InputDecoration(label: Text("Password")),
                   ),
-                  PublicWidget.spasi(),
+                  SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: InkWell(
@@ -61,7 +60,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  PublicWidget.spasi(jarak: 30),
+                  SizedBox(height: 30),
                   Center(
                     child: SizedBox(
                       height: 45,

@@ -1,6 +1,4 @@
 import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +7,6 @@ import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:simplepos/services/utils/constant.dart';
-import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class Menudrawer extends StatefulWidget with CacheManager {
   Menudrawer({super.key});
@@ -52,6 +49,7 @@ class _MenudrawerState extends State<Menudrawer> {
       if (dataUsaha != null) {
         String pathFile = dataUsaha.logoToko!;
         isLogoFileExist = await File(pathFile).exists();
+        setState(() {});
       }
     });
     super.initState();
@@ -124,27 +122,8 @@ class _MenudrawerState extends State<Menudrawer> {
                       fit: BoxFit.cover,
                     ),
                   )
-                : Stack(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        maxRadius: 40,
-                        child: Icon(
-                          Icons.storefront,
-                          size: 50,
-                          color: Colors.white,
-                        ),
-                      ),
-                      mstProv.dataUsaha!.logoToko != null
-                          ? Positioned(
-                              bottom: 5,
-                              right: 5,
-                              child: Icon(Symbols.info, color: Colors.yellow),
-                            )
-                          : SizedBox(),
-                    ],
-                  ),
-            PublicWidget.spasi(),
+                : _defaultLogo(context, mstProv),
+            SizedBox(height: 8),
             Text(
               mstProv.dataUsaha!.namaUsaha!,
               style: Theme.of(context).textTheme.titleMedium,
@@ -153,6 +132,25 @@ class _MenudrawerState extends State<Menudrawer> {
           ],
         ),
       ),
+    );
+  }
+
+  Stack _defaultLogo(BuildContext context, MasterProvider mstProv) {
+    return Stack(
+      children: [
+        CircleAvatar(
+          backgroundColor: Theme.of(context).primaryColor,
+          maxRadius: 40,
+          child: Icon(Icons.storefront, size: 50, color: Colors.white),
+        ),
+        mstProv.dataUsaha!.logoToko != null
+            ? Positioned(
+                bottom: 5,
+                right: 5,
+                child: Icon(Symbols.info, color: Colors.yellow),
+              )
+            : SizedBox(),
+      ],
     );
   }
 }

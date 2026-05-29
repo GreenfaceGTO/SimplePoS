@@ -10,6 +10,15 @@ class MasterdataRepo {
   final ProdukDao produkDao;
   MasterdataRepo({required this.usahaDao, required this.produkDao});
 
+  // ======== Menyimpan data produk =========
+  Future<ProdukModel> addNewProduk(ProdukModel data) async {
+    try {
+      return await produkDao.addNewProduk(data);
+    } catch (e) {
+      throw Exception("Gagal menyimpan : ${e.toString()}");
+    }
+  }
+
   // ========= Mengambil daftar produk =========
   Future<List<ProdukModel>> fetchAllProduk() async {
     try {
