@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -80,6 +78,7 @@ class _SatuanFormState extends State<SatuanForm> {
                     satuan: selectedSat,
                     barcode: txtbarcode.text,
                     isi: int.parse(txtIsi.text),
+                    tipe: tipe,
                     stok: tipe == 'D' ? int.parse(txtStok.text) : 0,
                     hPokok: double.parse(txtHpokok.text),
                     hJual: double.parse(txtHJual.text),

@@ -28,14 +28,16 @@ class TableScheme {
 
   static const createTbItemSat = '''CREATE TABLE $tbItemSat (
     id          INTEGER   PRIMARY KEY,
-    id_produk   INTEGER   REFERENCES tb_item (id) ON UPDATE CASCADE,
-    satuan      TEXT (10) CONSTRAINT [id_produk,satuan] UNIQUE,
+    id_produk   INTEGER   REFERENCES tb_item (id) ON DELETE CASCADE,
+    satuan      TEXT (10),
     isi         INTEGER,
-    barcode     TEXT      UNIQUE,
+    barcode     TEXT,
     tipe        TEXT (1)  CHECK (tipe IN ('D', 'K') ),
     h_pokok     REAL,
     h_jual      REAL,
-    pot_kemasan REAL
+    pot_kemasan REAL,
+
+    UNIQUE(id_produk, satuan)
 );
 ''';
 

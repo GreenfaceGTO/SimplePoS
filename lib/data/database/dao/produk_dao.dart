@@ -8,13 +8,13 @@ class ProdukDao {
     final db = await Dbmanager.database;
     try {
       return db.transaction<ProdukModel>((txn) async {
-        final idProduk = await txn.insert(TableScheme.tbItem, data.toMap());
+        final idProduk = await txn.insert(TableScheme.tbItem, data.toDb());
         data.id = idProduk;
 
         // insert data satuan
         for (var sat in data.lstSatuan) {
           sat.idProduk = idProduk;
-          final satId = await txn.insert(TableScheme.tbItemSat, sat.toMap());
+          final satId = await txn.insert(TableScheme.tbItemSat, sat.toDb());
           sat.id = satId;
         }
         return data;
@@ -38,9 +38,7 @@ class ProdukDao {
 
       for (var item in lstProduk) {
         final satuan = await getSatuanProduk(item.id!);
-        if (satuan.isNotEmpty) {
-          item.lstSatuan = satuan;
-        }
+        item.lstSatuan = satuan;
       }
       return lstProduk;
     } catch (e) {

@@ -1,9 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
@@ -104,7 +104,7 @@ class _KatalogFormState extends State<KatalogForm> {
     }
   }
 
-  void validateForm() {
+  void validateForm() async {
     if (satDasar == null) {
       PublicWidget.showMessage(
         message: "Satuan belum ditentukan",
@@ -125,10 +125,15 @@ class _KatalogFormState extends State<KatalogForm> {
       ProdukModel newProduk = ProdukModel(
         namaProduk: txtNama.text,
         tag: lstKategori,
-        stok: double.parse(satDasar!.stok.toString()),
+        stok: int.parse(satDasar!.stok.toString()),
         lstSatuan: sat,
       );
-      log(newProduk.toMap().toString());
+      // log(newProduk.toMap().toString());
+      if (await context.read<MasterProvider>().addNewProduk(newProduk)) {
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
     }
   }
 

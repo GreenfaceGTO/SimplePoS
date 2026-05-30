@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/widgets.dart';
 import 'package:simplepos/data/database/dao/produk_dao.dart';
 import 'package:simplepos/data/database/dao/usaha_dao.dart';
@@ -26,7 +28,9 @@ class MasterProvider with ChangeNotifier {
   List<String> get daftarKategori => _daftarKategori;
   List<String> get daftarSatuan => _daftarSatuan;
 
-  // =========setter==========
+  // =========================
+  // REFERENSI SETTER
+  // =========================
   void setUsahaData(UsahaModel data) {
     _dataUsaha = data;
     notifyListeners();
@@ -99,11 +103,28 @@ class MasterProvider with ChangeNotifier {
     List<String> result = [];
     for (var item in daftarProduk) {
       for (var sat in item.lstSatuan) {
-        if (!_daftarSatuan.contains(sat.satuan)) {
+        if (!result.contains(sat.satuan)) {
+          log("add satuan $sat");
           result.add(sat.satuan!);
+        } else {
+          log("skip satuan $sat");
         }
       }
     }
     return result;
+  }
+
+  // =========== Menambahkan produk ===========
+  Future<bool> addNewProduk(ProdukModel newProduk) async {
+    try {
+      var result = await _masterDataRepo.addNewProduk(newProduk);
+      _daftarProduk.add(result);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      log(e.toString());
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+    return false;
   }
 }

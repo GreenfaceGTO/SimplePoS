@@ -7,7 +7,7 @@ class ConnectivityService {
   Future<bool> hasConnection() async {
     log("$runtimeType : 1. Memeriksa koneksi perangkat...");
     var koneksi = await Connectivity().checkConnectivity();
-    if (koneksi.isNotEmpty && koneksi.contains(ConnectivityResult.none)) {
+    if (koneksi.isNotEmpty && !koneksi.contains(ConnectivityResult.none)) {
       log("$runtimeType : ada koneksi lanjut ke no 2.");
       return false;
     }
