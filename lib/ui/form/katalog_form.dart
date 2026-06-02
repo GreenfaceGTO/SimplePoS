@@ -3,12 +3,14 @@ import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
 import 'package:simplepos/ui/page/kategori_page.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
+import 'package:simplepos/ui/widget/reusable/hargasatuanbottomsheet.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class KatalogForm extends StatefulWidget {
@@ -22,12 +24,32 @@ class KatalogForm extends StatefulWidget {
 class _KatalogFormState extends State<KatalogForm> {
   final TextEditingController txtNama = TextEditingController();
 
+  ProdukModel? data, oldData;
   ProdukSatModel? satDasar;
   List<ProdukSatModel> satLain = [];
   List<String> lstKategori = [];
 
   // Widget spasi = PublicWidget.spasi();
   final formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.args.formMode == FormMode.update) {
+        oldData = widget.args.data;
+        data = widget.args.data.copyWith();
+
+        txtNama.text = data!.namaProduk!;
+        lstKategori = data!.tag!;
+        satDasar = data!.getSatuanDasar();
+        satDasar!.stok = data!.stok;
+        satLain = data!.lstSatuan.skip(1).toList();
+
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -116,20 +138,55 @@ class _KatalogFormState extends State<KatalogForm> {
         mode: MessageMode.warning,
       );
     } else if (formKey.currentState!.validate()) {
+      // Menambahkan satuan dasar di awal daftar satuan sebelum satuan lainnya
       List<ProdukSatModel> sat = [satDasar!];
+
+      // Looping variabel satLain lokal untuk di tambahkan di variabel sat, setelah satuan dasar
       for (var satkov in satLain) {
         if (!sat.contains(satkov)) {
           sat.add(satkov);
         }
       }
-      ProdukModel newProduk = ProdukModel(
-        namaProduk: txtNama.text,
-        tag: lstKategori,
-        stok: int.parse(satDasar!.stok.toString()),
-        lstSatuan: sat,
-      );
-      // log(newProduk.toMap().toString());
-      if (await context.read<MasterProvider>().addNewProduk(newProduk)) {
+
+      // inisialisasi variabel selesai = gagal
+      bool done = false;
+
+      if (widget.args.formMode == FormMode.input) {
+        // jika mode input, buat instance kelas produk dengan data dari form
+        ProdukModel newProduk = ProdukModel(
+          namaProduk: txtNama.text,
+          tag: lstKategori,
+          stok: int.parse(satDasar!.stok.toString()),
+          lstSatuan: sat,
+        );
+
+        // tambahkan ke database
+        done = await context.read<MasterProvider>().addNewProduk(newProduk);
+      } else {
+        // jika mode update, perbarui semua properti data lama
+        data!.namaProduk = txtNama.text;
+
+        // ganti tag kategori lama dengan yang baru diupdate
+        data!.tag = lstKategori;
+
+        List<ProdukSatModel> newSats = [satDasar!];
+
+        for (var sat in satLain) {
+          newSats.add(sat);
+        }
+        data!.lstSatuan = newSats;
+
+        // //cari posisi index satuan dasar
+        // int idx = data!.lstSatuan.indexWhere((e) => e.id == satDasar!.id);
+
+        // // ganti satuan dasar lama dengan yang baru diupdate
+        // data!.lstSatuan[idx] = satDasar!;
+
+        // update didatabase;
+        done = await context.read<MasterProvider>().updateProduk(data!);
+      }
+
+      if (done) {
         if (mounted) {
           Navigator.pop(context);
         }
@@ -178,7 +235,7 @@ class _KatalogFormState extends State<KatalogForm> {
                       SizedBox(height: 16),
 
                       TextFormField(
-                        autofocus: true,
+                        autofocus: widget.args.formMode == FormMode.input,
                         controller: txtNama,
                         onChanged: (val) {
                           setState(() {});
@@ -342,6 +399,22 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
+  void updateHarga(ProdukSatModel updatedData) {
+    satDasar = updatedData;
+    data!.lstSatuan.clear();
+    data!.lstSatuan.add(satDasar!);
+
+    double hPokok = satDasar!.hPokok!;
+    double hJual = satDasar!.hJual!;
+    for (var sat in satLain) {
+      sat.hPokok = hPokok * sat.isi;
+      sat.hJual = hJual * sat.isi;
+      data!.lstSatuan.add(sat);
+    }
+
+    setState(() {});
+  }
+
   Container _satDasar(ThemeData tema) {
     return Container(
       padding: EdgeInsets.all(8),
@@ -358,18 +431,33 @@ class _KatalogFormState extends State<KatalogForm> {
             leading: Icon(Symbols.filter_1),
             title: Text(satDasar!.satuan!, style: tema.textTheme.titleSmall),
             subtitle: Text("Satuan Dasar"),
-            trailing: satLain.isEmpty
-                ? IconButton(
-                    onPressed: () {
-                      deleteSatuan(satDasar!);
+            trailing: widget.args.formMode == FormMode.input
+                ? (satLain.isEmpty
+                      ? (IconButton(
+                          onPressed: () {
+                            deleteSatuan(satDasar!);
+                          },
+                          icon: Icon(
+                            Icons.delete_forever_outlined,
+                            size: 18,
+                            color: Colors.red,
+                          ),
+                        ))
+                      : null)
+                : IconButton(
+                    tooltip: "Ubah Harga",
+                    onPressed: () async {
+                      final result = await Hargasatuanbottomsheet.show(
+                        context: context,
+                        produk: data!,
+                        idSatuan: satDasar!.id!,
+                      );
+                      if (result != null) {
+                        updateHarga(result);
+                      }
                     },
-                    icon: Icon(
-                      Icons.delete_forever_outlined,
-                      size: 18,
-                      color: Colors.red,
-                    ),
-                  )
-                : null,
+                    icon: Icon(Icons.edit, size: 18, color: tema.primaryColor),
+                  ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 40),

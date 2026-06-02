@@ -10,6 +10,24 @@ class MasterdataRepo {
   final ProdukDao produkDao;
   MasterdataRepo({required this.usahaDao, required this.produkDao});
 
+  // ====== Mengupdate produk ==========
+  Future<ProdukModel> updateProduk(ProdukModel produk) async {
+    try {
+      return await produkDao.updateProduk(produk);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // ======= Menghapus produk ============
+  Future<bool> delProduk(ProdukModel data) async {
+    try {
+      return await produkDao.deleteProduk(data);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // ======== Menyimpan data produk =========
   Future<ProdukModel> addNewProduk(ProdukModel data) async {
     try {

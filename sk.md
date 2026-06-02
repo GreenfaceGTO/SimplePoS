@@ -1,4 +1,4 @@
-#Syarat & Ketentuan 
+# Syarat & Ketentuan 
 
 Terakhir diperbaharui tgl : 19 mei 2026
 

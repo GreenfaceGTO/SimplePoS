@@ -1,11 +1,11 @@
 # Simple PoS
-
 Micro Bussiness Solution Simple Point of Sale
 
-## Deskripsi
+## Gambaran Produk
 
-MBS Simple PoS adalah aplikasi mobile point of sale sederhana dengan mode offline untuk usaha retail kecil menengah.
+MBS Simple PoS adalah aplikasi mobile point of sale sederhana untuk usaha retail kecil dan menengah (WARUNG) yang berjalan secara offline dan online. Mendukung fitur multi satuan, pencatatan unserve (permintaan pasar yang tidak terlayani) dan manajemen stok.
 
+## 
 ## Fitur Utama
 - Penjualan 
 - Pembelian

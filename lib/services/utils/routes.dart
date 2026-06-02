@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/dummy_page.dart';
 import 'package:simplepos/ui/form/katalog_form.dart';

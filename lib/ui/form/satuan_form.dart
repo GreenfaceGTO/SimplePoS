@@ -3,6 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
@@ -30,17 +31,23 @@ class _SatuanFormState extends State<SatuanForm> {
   final TextEditingController txtHJual = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  bool showSatDasarInfo = false;
+
   @override
   void initState() {
     namaItem = widget.args.data['nama_item'];
-    if (widget.args.data['sat_dasar'] != null) {
-      tipe = "K";
-      satDasar = widget.args.data['sat_dasar'];
-      txtHpokok.text = widget.args.data['sat_dasar'].hPokok.toStringAsFixed(0);
-    } else {
-      txtIsi.text = "1";
-    }
-
+    if (widget.args.formMode == FormMode.input) {
+      if (widget.args.data['sat_dasar'] != null) {
+        tipe = "K";
+        satDasar = widget.args.data['sat_dasar'];
+        txtHpokok.text = widget.args.data['sat_dasar'].hPokok.toStringAsFixed(
+          0,
+        );
+      } else {
+        txtIsi.text = "1";
+      }
+    } else {}
+    showSatDasarInfo = tipe == 'D';
     super.initState();
   }
 
@@ -101,168 +108,194 @@ class _SatuanFormState extends State<SatuanForm> {
         builder: (context, prov, _) {
           return Form(
             key: formKey,
-            child: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(bottom: 12),
-                  width: double.infinity,
-                  child: ListTile(
-                    visualDensity: VisualDensity(vertical: -4),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  if (showSatDasarInfo) _bannerInfo(),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 12),
+                    width: double.infinity,
+                    child: ListTile(
+                      visualDensity: VisualDensity(vertical: -4),
 
-                    title: Text("Nama Produk", style: tema.textTheme.bodySmall),
-                    subtitle: Text(
-                      namaItem!,
-                      style: tema.textTheme.titleMedium,
+                      title: Text(
+                        "Nama Produk",
+                        style: tema.textTheme.bodySmall,
+                      ),
+                      subtitle: Text(
+                        namaItem!,
+                        style: tema.textTheme.titleMedium,
+                      ),
                     ),
+                    // Text(namaItem!, style: TextStyle(color: Colors.red)),
                   ),
-                  // Text(namaItem!, style: TextStyle(color: Colors.red)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _opsiSatuan(tema),
-                      SizedBox(height: 8),
-                      TextFormField(
-                        controller: txtbarcode,
-                        textInputAction: TextInputAction.next,
-                        keyboardType: TextInputType.number,
-                        onFieldSubmitted: (val) {
-                          FocusScope.of(context).nextFocus();
-                        },
-                        decoration: InputDecoration(
-                          label: Text("Barcode"),
-                          hintText: "Masukkan atau scan barcode",
-                          suffixIcon: IconButton(
-                            onPressed: () async {
-                              String? scanned = await PublicWidget.scanBarcode(
-                                context,
-                              );
-                              if (scanned != null) {
-                                setState(() {
-                                  txtbarcode.text = scanned;
-                                });
-                              }
-                            },
-                            icon: Icon(
-                              Symbols.barcode_scanner,
-                              size: 18,
-                              color: tema.primaryColor,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _opsiSatuan(tema),
+                        SizedBox(height: 8),
+                        TextFormField(
+                          controller: txtbarcode,
+                          textInputAction: TextInputAction.next,
+                          keyboardType: TextInputType.number,
+                          onFieldSubmitted: (val) {
+                            FocusScope.of(context).nextFocus();
+                          },
+                          decoration: InputDecoration(
+                            label: Text("Barcode"),
+                            hintText: "Masukkan atau scan barcode",
+                            suffixIcon: IconButton(
+                              onPressed: () async {
+                                String? scanned =
+                                    await PublicWidget.scanBarcode(context);
+                                if (scanned != null) {
+                                  setState(() {
+                                    txtbarcode.text = scanned;
+                                  });
+                                }
+                              },
+                              icon: Icon(
+                                Symbols.barcode_scanner,
+                                size: 18,
+                                color: tema.primaryColor,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              enabled: tipe != 'D',
-                              controller: txtIsi,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.number,
-                              onChanged: (val) {
-                                hitungHarga(dari: "isi");
-                              },
-                              decoration: InputDecoration(label: Text("Isi")),
-                              validator: tipe == "K"
-                                  ? (val) {
-                                      if (val!.isEmpty) {
-                                        return "Wajib diisi";
-                                      } else if (int.parse(val) < 2) {
-                                        return "Harus lebih dari 1";
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                enabled: tipe != 'D',
+                                controller: txtIsi,
+                                textInputAction: TextInputAction.next,
+                                keyboardType: TextInputType.number,
+                                onChanged: (val) {
+                                  hitungHarga(dari: "isi");
+                                },
+                                decoration: InputDecoration(label: Text("Isi")),
+                                validator: tipe == "K"
+                                    ? (val) {
+                                        if (val!.isEmpty) {
+                                          return "Wajib diisi";
+                                        } else if (int.parse(val) < 2) {
+                                          return "Harus lebih dari 1";
+                                        }
+                                        return null;
                                       }
-                                      return null;
-                                    }
-                                  : null,
+                                    : null,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 8),
+                            SizedBox(width: 8),
 
-                          Expanded(
-                            child: tipe == "D"
-                                ? TextFormField(
-                                    controller: txtStok,
-                                    keyboardType: TextInputType.number,
-                                    textInputAction: TextInputAction.next,
-                                    decoration: InputDecoration(
-                                      label: Text("Stok Awal"),
-                                    ),
-                                  )
-                                : SizedBox(),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: txtHpokok,
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.next,
-                              errorBuilder: (context, errorText) => Text(
-                                errorText,
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: tipe == "D"
+                                  ? TextFormField(
+                                      controller: txtStok,
+                                      keyboardType: TextInputType.number,
+                                      textInputAction: TextInputAction.next,
+                                      decoration: InputDecoration(
+                                        label: Text("Stok Awal"),
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: txtHpokok,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.next,
+                                errorBuilder: (context, errorText) => Text(
+                                  errorText,
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              decoration: InputDecoration(
-                                // errorMaxLines: 2,
-                                label: Text("Harga Pokok"),
-                              ),
-                              validator: (val) {
-                                if (tipe == 'K') {
-                                  // log(tipe.toString());
-                                  if (val!.isEmpty) {
-                                    return "Wajib diisi";
-                                  } else if (txtIsi.text.isNotEmpty) {
-                                    if (double.parse(val) <
-                                        (satDasar!.hPokok! *
-                                            int.parse(txtIsi.text))) {
-                                      return "Terlalu kecil dari harga konversi satuan dasar";
+                                decoration: InputDecoration(
+                                  // errorMaxLines: 2,
+                                  label: Text("Harga Pokok"),
+                                ),
+                                validator: (val) {
+                                  if (tipe == 'K') {
+                                    // log(tipe.toString());
+                                    if (val!.isEmpty) {
+                                      return "Wajib diisi";
+                                    } else if (txtIsi.text.isNotEmpty) {
+                                      if (double.parse(val) <
+                                          (satDasar!.hPokok! *
+                                              int.parse(txtIsi.text))) {
+                                        return "Terlalu kecil dari harga konversi satuan dasar";
+                                      }
                                     }
                                   }
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextFormField(
-                              controller: txtHJual,
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.done,
-                              decoration: InputDecoration(
-                                label: Text("Harga Jual"),
+                                  return null;
+                                },
                               ),
-                              validator: (val) {
-                                if (val!.isEmpty) {
-                                  return "Wajib diisi";
-                                } else if (double.parse(val) <=
-                                    double.parse(txtHpokok.text)) {
-                                  return "Harga jual salah!";
-                                }
-                                return null;
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: txtHJual,
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
+                                decoration: InputDecoration(
+                                  label: Text("Harga Jual"),
+                                ),
+                                validator: (val) {
+                                  if (val!.isEmpty) {
+                                    return "Wajib diisi";
+                                  } else if (double.parse(val) <=
+                                      double.parse(txtHpokok.text)) {
+                                    return "Harga jual salah!";
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
       ),
+    );
+  }
+
+  MaterialBanner _bannerInfo() {
+    return MaterialBanner(
+      contentTextStyle: TextStyle(color: Colors.white),
+      elevation: 3,
+      backgroundColor: Colors.teal,
+      leading: Icon(Icons.info_outline, color: Colors.white),
+      content: Text("Satuan dasar bersifat permanen setelah disimpan."),
+      actions: [
+        TextButton(
+          onPressed: () {
+            setState(() {
+              showSatDasarInfo = false;
+            });
+          },
+          child: Text("OK", style: TextStyle(color: Colors.white)),
+        ),
+      ],
     );
   }
 

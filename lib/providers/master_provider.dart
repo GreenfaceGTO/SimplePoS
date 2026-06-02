@@ -127,4 +127,32 @@ class MasterProvider with ChangeNotifier {
     }
     return false;
   }
+
+  // =========== Mengupdate produk =============
+  Future<bool> updateProduk(ProdukModel updatedProduk) async {
+    try {
+      final result = await _masterDataRepo.updateProduk(updatedProduk);
+      int idx = _daftarProduk.indexWhere((e) => e.id == result.id);
+      _daftarProduk[idx] = result;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      log(e.toString());
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+    return false;
+  }
+
+  // ======= Menghapus produk ==========
+  Future<void> deleteProduk(ProdukModel data) async {
+    try {
+      final result = await _masterDataRepo.delProduk(data);
+      if (result) {
+        _daftarProduk.removeWhere((e) => e.id == data.id);
+        notifyListeners();
+      }
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+  }
 }

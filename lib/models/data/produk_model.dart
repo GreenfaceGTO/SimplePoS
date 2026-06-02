@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:simplepos/models/data/produksat_model.dart';
+
 class ProdukModel {
   int? id;
   String? namaProduk;
@@ -42,6 +44,22 @@ class ProdukModel {
     "stok": stok,
   };
 
+  ProdukModel copyWith({
+    int? id,
+    String? namaProduk,
+    List<String>? tag,
+    int? stok,
+    List<ProdukSatModel>? lstSatuan,
+  }) {
+    return ProdukModel(
+      id: id ?? this.id,
+      namaProduk: namaProduk ?? this.namaProduk,
+      tag: tag ?? this.tag,
+      stok: stok ?? this.stok,
+      lstSatuan: lstSatuan ?? this.lstSatuan,
+    );
+  }
+
   ProdukSatModel? getSatuanDasar() {
     try {
       return lstSatuan.firstWhere((e) => e.tipe == 'D');
@@ -49,68 +67,17 @@ class ProdukModel {
       return null;
     }
   }
-}
 
-class ProdukSatModel {
-  int? id;
-  int? idProduk;
-  String? satuan;
-  int isi;
-  String? barcode;
-  String? tipe;
-  double? hPokok;
-  double? hJual;
-  double diskon;
-  int? stok;
-
-  ProdukSatModel({
-    this.id,
-    this.idProduk,
-    this.satuan,
-    this.isi = 0,
-    this.barcode,
-    this.tipe,
-    this.hPokok,
-    this.hJual,
-    this.diskon = 0,
-    this.stok,
-  });
-
-  factory ProdukSatModel.fromMap(Map<String, dynamic> map) => ProdukSatModel(
-    id: map['id'],
-    idProduk: map['id_produk'],
-    satuan: map['satuan'],
-    isi: map['isi'],
-    barcode: map['barcode'],
-    tipe: map['tipe'],
-    hPokok: map['h_pokok'],
-    hJual: map['h_jual'],
-    diskon: map['pot_kemasan'],
-    stok: map['stok'],
-  );
-
-  Map<String, dynamic> toMap() => {
-    "id": id,
-    "id_produk": idProduk,
-    "satuan": satuan,
-    "isi": isi,
-    "barcode": barcode,
-    "tipe": tipe,
-    "h_pokok": hPokok,
-    "h_jual": hJual,
-    "pot_kemasan": diskon,
-    "stok": stok,
-  };
-
-  Map<String, dynamic> toDb() => {
-    "id": id,
-    "id_produk": idProduk,
-    "satuan": satuan,
-    "isi": isi,
-    "barcode": barcode,
-    "tipe": tipe,
-    "h_pokok": hPokok,
-    "h_jual": hJual,
-    "pot_kemasan": diskon,
-  };
+  bool compare(ProdukModel other) {
+    if (id != other.id) return false;
+    if (namaProduk != other.namaProduk) return false;
+    if (tag!.length != other.tag!.length) return false;
+    if (lstSatuan.length != other.lstSatuan.length) return false;
+    for (int i = 0; i < lstSatuan.length; i++) {
+      if (!lstSatuan[i].compare(other.lstSatuan[i])) {
+        return false;
+      }
+    }
+    return false;
+  }
 }

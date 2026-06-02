@@ -1,6 +1,3 @@
-import 'dart:developer';
-
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
@@ -25,6 +22,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
+          contentTextStyle: Theme.of(context).textTheme.bodyLarge,
           title: Text("Konfirmasi"),
           content: Text(
             "Yakin ingin menghapus produk ${produk.namaProduk} ini?",
@@ -48,27 +46,20 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
     );
 
     if (confirm != null && confirm) {
-      log("Hapus");
+      if (mounted) {
+        context.read<MasterProvider>().deleteProduk(produk);
+      }
     }
-  }
-
-  void showSatuanLain(ProdukSatModel satuan) async {
-    return await showModalBottomSheet(
-      context: context,
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Column(mainAxisSize: MainAxisSize.min),
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData tema = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text("Katalog Produk")),
+      appBar: AppBar(
+        title: Text("Katalog Produk"),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: "masterproduk",
         onPressed: () {
@@ -98,8 +89,8 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
           margin: EdgeInsets.symmetric(vertical: 4),
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            border: Border.all(color: Colors.teal, width: 0.8),
+            color: Colors.teal.shade50,
+            border: Border.all(color: Colors.teal, width: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -122,42 +113,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
               Divider(height: 3),
               Row(
                 children: [
-                  Expanded(
-                    flex: 4,
-                    child: SizedBox(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomRowField(
-                            title: "Satuan Dasar :",
-                            value: Text(
-                              "${item.getSatuanDasar()!.satuan}",
-                              style: tema.textTheme.bodyMedium!.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          CustomRowField(
-                            title: "Harga Pokok :",
-                            value: Text(
-                              PublicWidget.toRupiah.format(
-                                item.getSatuanDasar()!.hPokok,
-                              ),
-                            ),
-                          ),
-                          CustomRowField(
-                            title: "Harga Jual :",
-                            value: Text(
-                              PublicWidget.toRupiah.format(
-                                item.getSatuanDasar()!.hJual,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _satuanDasar(item, tema),
                   SizedBox(
                     height: 60,
                     child: VerticalDivider(
@@ -165,69 +121,19 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
                       color: Colors.black26,
                     ),
                   ),
-                  Expanded(
-                    flex: 1,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text("Stok"),
-                        SizedBox(height: 4),
-                        Text(
-                          item.stok.toString(),
-                          style: tema.textTheme.titleSmall,
-                        ),
-                      ],
-                    ),
-                  ),
+                  _stok(item, tema),
                 ],
               ),
-              Divider(),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Kategori :",
-                          style: tema.textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          item.tag!
-                              .map((e) => e)
-                              .whereType<String>()
-                              .join(', '),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 40, child: VerticalDivider()),
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Satuan Lainnya :",
-                          style: tema.textTheme.bodyMedium!.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          item.lstSatuan
-                              .map((e) => e.satuan)
-                              .whereType<String>()
-                              .join(', '),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              Divider(height: 3),
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _kategori(tema, item),
+                    VerticalDivider(),
+                    _satuanLain(tema, item),
+                  ],
+                ),
               ),
             ],
           ),
@@ -236,11 +142,114 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
     );
   }
 
+  Expanded _satuanLain(ThemeData tema, ProdukModel item) {
+    return Expanded(
+      flex: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Satuan Lainnya :",
+            style: tema.textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            item.lstSatuan
+                .skip(1)
+                .map((e) => "${e.satuan} (${e.isi})")
+                .whereType<String>()
+                .join(', '),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Expanded _kategori(ThemeData tema, ProdukModel item) {
+    return Expanded(
+      flex: 3,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Kategori :",
+            style: tema.textTheme.bodyMedium!.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          SizedBox(width: 8),
+          Text(item.tag!.map((e) => e).whereType<String>().join(', ')),
+        ],
+      ),
+    );
+  }
+
+  Expanded _stok(ProdukModel item, ThemeData tema) {
+    return Expanded(
+      flex: 1,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Text("Stok"),
+          SizedBox(height: 4),
+          Text(item.stok.toString(), style: tema.textTheme.titleSmall),
+        ],
+      ),
+    );
+  }
+
+  Expanded _satuanDasar(ProdukModel item, ThemeData tema) {
+    return Expanded(
+      flex: 4,
+      child: SizedBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomRowField(
+              title: "Satuan Dasar :",
+              value: Text(
+                "${item.getSatuanDasar()!.satuan}",
+                style: tema.textTheme.bodyMedium!.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            CustomRowField(
+              title: "Harga Pokok :",
+              value: Text(
+                PublicWidget.toRupiah.format(item.getSatuanDasar()!.hPokok),
+              ),
+            ),
+            CustomRowField(
+              title: "Harga Jual :",
+              value: Text(
+                PublicWidget.toRupiah.format(item.getSatuanDasar()!.hJual),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   PopupMenuButton<String> _popMenuProduk(ProdukModel produk) {
     return PopupMenuButton(
       onSelected: (val) {
-        if (val == "/mutasi") {
-          log(produk.toMap().toString());
+        switch (val) {
+          case "/hapus":
+            deleteProduk(produk);
+
+            break;
+          case "/edit":
+            Navigator.pushNamed(
+              context,
+              rtFormKatalogProduk,
+              arguments: ArgsModel(formMode: FormMode.update, data: produk),
+            );
+            break;
+          default:
         }
       },
       itemBuilder: (context) {
