@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:provider/provider.dart';
@@ -24,30 +26,31 @@ class KatalogForm extends StatefulWidget {
 class _KatalogFormState extends State<KatalogForm> {
   final TextEditingController txtNama = TextEditingController();
 
-  ProdukModel? data, oldData;
+  ProdukModel? data;
+  ProdukModel? oldData;
   ProdukSatModel? satDasar;
   List<ProdukSatModel> satLain = [];
-  List<String> lstKategori = [];
 
   // Widget spasi = PublicWidget.spasi();
   final formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (widget.args.formMode == FormMode.update) {
-        oldData = widget.args.data;
-        data = widget.args.data.copyWith();
+    if (widget.args.formMode == FormMode.update) {
+      oldData = widget.args.data;
+      data = oldData!.copyWith();
 
-        txtNama.text = data!.namaProduk!;
-        lstKategori = data!.tag!;
-        satDasar = data!.getSatuanDasar();
-        satDasar!.stok = data!.stok;
-        satLain = data!.lstSatuan.skip(1).toList();
+      txtNama.text = data!.namaProduk!;
+      // lstKategori = data!.tag!;
+      satDasar = data!.getSatuanDasar();
+      satDasar!.stok = data!.stok;
+      satLain = data!.lstSatuan!.skip(1).toList();
 
-        setState(() {});
-      }
-    });
+      setState(() {});
+    } else {
+      data = ProdukModel();
+    }
+
     super.initState();
   }
 
@@ -86,7 +89,7 @@ class _KatalogFormState extends State<KatalogForm> {
     );
     if (confirm != null && confirm) {
       setState(() {
-        lstKategori.removeWhere((e) => e == kat);
+        data!.tag!.removeWhere((e) => e == kat);
       });
     }
   }
@@ -117,22 +120,25 @@ class _KatalogFormState extends State<KatalogForm> {
     );
     if (confirm != null && confirm) {
       setState(() {
-        if (satuan.isi > 1) {
-          satLain.removeWhere((e) => e.satuan == satuan.satuan);
+        if (satuan.tipe == 'K') {
+          data!.lstSatuan!.removeWhere(
+            (e) => e.satuan!.toLowerCase() == satuan.satuan!.toLowerCase(),
+          );
         } else {
-          satDasar = null;
+          data!.lstSatuan!.clear();
         }
       });
     }
   }
 
   void validateForm() async {
-    if (satDasar == null) {
+    bool satDasarExist = data!.lstSatuan!.any((e) => e.tipe == "D");
+    if (!satDasarExist) {
       PublicWidget.showMessage(
         message: "Satuan belum ditentukan",
         mode: MessageMode.warning,
       );
-    } else if (lstKategori.isEmpty) {
+    } else if (data!.tag!.isEmpty) {
       PublicWidget.showMessage(
         message: "Setidaknya tentukan 1 kategori",
         mode: MessageMode.warning,
@@ -148,41 +154,14 @@ class _KatalogFormState extends State<KatalogForm> {
         }
       }
 
-      // inisialisasi variabel selesai = gagal
+      // inisialisasi awal variabel selesai = gagal
       bool done = false;
 
       if (widget.args.formMode == FormMode.input) {
         // jika mode input, buat instance kelas produk dengan data dari form
-        ProdukModel newProduk = ProdukModel(
-          namaProduk: txtNama.text,
-          tag: lstKategori,
-          stok: int.parse(satDasar!.stok.toString()),
-          lstSatuan: sat,
-        );
 
-        // tambahkan ke database
-        done = await context.read<MasterProvider>().addNewProduk(newProduk);
+        done = await context.read<MasterProvider>().addNewProduk(data!);
       } else {
-        // jika mode update, perbarui semua properti data lama
-        data!.namaProduk = txtNama.text;
-
-        // ganti tag kategori lama dengan yang baru diupdate
-        data!.tag = lstKategori;
-
-        List<ProdukSatModel> newSats = [satDasar!];
-
-        for (var sat in satLain) {
-          newSats.add(sat);
-        }
-        data!.lstSatuan = newSats;
-
-        // //cari posisi index satuan dasar
-        // int idx = data!.lstSatuan.indexWhere((e) => e.id == satDasar!.id);
-
-        // // ganti satuan dasar lama dengan yang baru diupdate
-        // data!.lstSatuan[idx] = satDasar!;
-
-        // update didatabase;
         done = await context.read<MasterProvider>().updateProduk(data!);
       }
 
@@ -194,70 +173,151 @@ class _KatalogFormState extends State<KatalogForm> {
     }
   }
 
+  bool canPop() {
+    if (widget.args.formMode == FormMode.input) return true;
+
+    if (data == null) return false;
+    bool retval = data!.compare(oldData!);
+    log("$runtimeType : result $retval");
+    return retval;
+  }
+
+  void updateField(String from, {dynamic value}) {
+    switch (from) {
+      case "nama":
+        data!.namaProduk = txtNama.text;
+
+        break;
+      case "tag":
+        if (value != null) {
+          data!.tag!.clear();
+          data!.tag!.addAll(value);
+        }
+        break;
+      case "satuan":
+        if (value != null) {
+          if (value is ProdukSatModel) {
+            if (value.tipe == 'D') {
+              satDasar = value;
+            } else {
+              if (satLain.any(
+                (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
+              )) {
+                PublicWidget.showMessage(
+                  message: "Satuan sudah ada!",
+                  mode: MessageMode.info,
+                );
+              } else {
+                satLain.add(value);
+              }
+            }
+            data!.lstSatuan!.add(value);
+          }
+        }
+        break;
+      default:
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData tema = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.args.formMode == FormMode.input
-              ? "Produk Baru"
-              : "Update Produk",
-        ),
-        actions: [
-          IconButton(
-            tooltip: "Simpan",
-            onPressed: () {
-              validateForm();
-            },
-            icon: Icon(Icons.save),
+    return PopScope(
+      canPop: canPop(),
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final keluar = await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text("Konfirmasi"),
+            content: Text("Perubahan belum disimpan!! Keluar tanpa menyimpan?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx, true);
+                },
+                child: Text("KELUAR"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx, false);
+                },
+                child: Text("BATAL"),
+              ),
+            ],
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black38, width: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Informasi Umum", style: tema.textTheme.titleMedium),
-                      SizedBox(height: 16),
-
-                      TextFormField(
-                        autofocus: widget.args.formMode == FormMode.input,
-                        controller: txtNama,
-                        onChanged: (val) {
-                          setState(() {});
-                        },
-                        inputFormatters: [CapitalizeEachWord()],
-                        decoration: InputDecoration(
-                          label: Text("Nama Produk"),
-                          hintText: "Masukkan nama produk",
+        );
+        if (keluar != null && keluar && context.mounted) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            widget.args.formMode == FormMode.input
+                ? "Produk Baru"
+                : "Update Produk",
+          ),
+          actions: [
+            IconButton(
+              tooltip: "Simpan",
+              onPressed: () {
+                validateForm();
+              },
+              icon: Icon(Icons.save),
+            ),
+          ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black38, width: 0.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Informasi Umum",
+                          style: tema.textTheme.titleMedium,
                         ),
-                        validator: (val) {
-                          if (val!.isEmpty) return "Wajib diisi";
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: 8),
-                      _tagKategori(tema),
-                    ],
+                        SizedBox(height: 16),
+
+                        TextFormField(
+                          autofocus: widget.args.formMode == FormMode.input,
+                          controller: txtNama,
+                          onChanged: (val) {
+                            txtNama.text = val;
+                            updateField("nama");
+                          },
+                          inputFormatters: [CapitalizeEachWord()],
+                          decoration: InputDecoration(
+                            label: Text("Nama Produk"),
+                            hintText: "Masukkan nama produk",
+                          ),
+                          validator: (val) {
+                            if (val!.isEmpty) return "Wajib diisi";
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 8),
+                        _tagKategori(tema),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 8),
-                _satuanSection(tema, context),
-              ],
+                  SizedBox(height: 8),
+                  _satuanSection(tema, context),
+                ],
+              ),
             ),
           ),
         ),
@@ -265,6 +325,7 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
+  /// Widget grup satuan dan harga
   Container _satuanSection(ThemeData tema, BuildContext context) {
     return Container(
       width: double.infinity,
@@ -290,7 +351,7 @@ class _KatalogFormState extends State<KatalogForm> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (satLain.isNotEmpty)
-                          ...satLain.map((e) {
+                          ...data!.lstSatuan!.skip(1).map((e) {
                             return _satuanLainCard(tema, e);
                           }),
                         Padding(
@@ -312,9 +373,7 @@ class _KatalogFormState extends State<KatalogForm> {
                                       ),
                                     );
                                 if (satKonv != null) {
-                                  setState(() {
-                                    satLain.add(satKonv);
-                                  });
+                                  updateField("satuan", value: satKonv);
                                 }
                               },
                               child: Text("Satuan Lainnya"),
@@ -401,20 +460,21 @@ class _KatalogFormState extends State<KatalogForm> {
 
   void updateHarga(ProdukSatModel updatedData) {
     satDasar = updatedData;
-    data!.lstSatuan.clear();
-    data!.lstSatuan.add(satDasar!);
+    data!.lstSatuan!.clear();
+    data!.lstSatuan!.add(satDasar!);
 
     double hPokok = satDasar!.hPokok!;
     double hJual = satDasar!.hJual!;
     for (var sat in satLain) {
       sat.hPokok = hPokok * sat.isi;
       sat.hJual = hJual * sat.isi;
-      data!.lstSatuan.add(sat);
+      data!.lstSatuan!.add(sat);
     }
 
     setState(() {});
   }
 
+  // Widget khusus untuk menampilkan satuan dasar
   Container _satDasar(ThemeData tema) {
     return Container(
       padding: EdgeInsets.all(8),
@@ -502,6 +562,7 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
+  /// Widget jika belum ada satuan sama sekali
   SizedBox _noSatDasarWidget(BuildContext context) {
     return SizedBox(
       height: 45,
@@ -517,9 +578,11 @@ class _KatalogFormState extends State<KatalogForm> {
                   ),
                 );
                 if (satuan != null) {
-                  setState(() {
-                    satDasar = satuan;
-                  });
+                  updateField("satuan", value: satuan);
+                  // setState(() {
+                  //   satDasar = satuan;
+
+                  // });
                 }
               }
             : null,
@@ -567,14 +630,11 @@ class _KatalogFormState extends State<KatalogForm> {
                     List<String>? kat = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => KategoriPage(currentTag: lstKategori),
+                        builder: (_) => KategoriPage(currentTag: data!.tag!),
                       ),
                     );
                     if (kat != null) {
-                      setState(() {
-                        lstKategori.clear();
-                        lstKategori.addAll(kat);
-                      });
+                      updateField("tag", value: kat);
                     }
                   },
                   icon: Icon(
@@ -588,7 +648,7 @@ class _KatalogFormState extends State<KatalogForm> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            child: lstKategori.isEmpty
+            child: data!.tag!.isEmpty
                 ? Center(
                     child: EmptydataElement(
                       caption: "Belum ada Kategori",
@@ -601,8 +661,9 @@ class _KatalogFormState extends State<KatalogForm> {
                       spacing: 8,
                       runSpacing: 8,
                       alignment: WrapAlignment.start,
-                      children: lstKategori.map((kat) {
+                      children: data!.tag!.map((kat) {
                         return InputChip(
+                          deleteIconColor: Colors.red,
                           label: Text(kat),
                           onDeleted: () {
                             deleteKategori(kat);

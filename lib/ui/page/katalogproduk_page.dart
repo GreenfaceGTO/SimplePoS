@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
@@ -89,7 +91,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
           margin: EdgeInsets.symmetric(vertical: 4),
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.teal.shade50,
+            color: Colors.grey.shade50,
             border: Border.all(color: Colors.teal, width: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -129,9 +131,9 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _kategori(tema, item),
-                    VerticalDivider(),
                     _satuanLain(tema, item),
+                    VerticalDivider(),
+                    _kategori(tema, item),
                   ],
                 ),
               ),
@@ -155,7 +157,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
             ),
           ),
           Text(
-            item.lstSatuan
+            item.lstSatuan!
                 .skip(1)
                 .map((e) => "${e.satuan} (${e.isi})")
                 .whereType<String>()
@@ -168,7 +170,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
 
   Expanded _kategori(ThemeData tema, ProdukModel item) {
     return Expanded(
-      flex: 3,
+      flex: 5,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -243,6 +245,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
 
             break;
           case "/edit":
+            log("$runtimeType: ${produk.toMap().toString()}");
             Navigator.pushNamed(
               context,
               rtFormKatalogProduk,

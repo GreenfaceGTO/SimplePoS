@@ -102,7 +102,7 @@ class MasterProvider with ChangeNotifier {
   Future<List<String>> buildSatuanList() async {
     List<String> result = [];
     for (var item in daftarProduk) {
-      for (var sat in item.lstSatuan) {
+      for (var sat in item.lstSatuan!) {
         if (!result.contains(sat.satuan)) {
           log("add satuan $sat");
           result.add(sat.satuan!);
@@ -131,6 +131,7 @@ class MasterProvider with ChangeNotifier {
   // =========== Mengupdate produk =============
   Future<bool> updateProduk(ProdukModel updatedProduk) async {
     try {
+      log(updatedProduk.toMap().toString());
       final result = await _masterDataRepo.updateProduk(updatedProduk);
       int idx = _daftarProduk.indexWhere((e) => e.id == result.id);
       _daftarProduk[idx] = result;

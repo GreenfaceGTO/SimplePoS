@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
-import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/enums.dart';

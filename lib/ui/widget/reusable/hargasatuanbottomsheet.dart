@@ -40,10 +40,10 @@ class _HargasatuanbottomsheetState extends State<Hargasatuanbottomsheet> {
   void initState() {
     super.initState();
 
-    int idx = widget.produk.lstSatuan.indexWhere(
+    int idx = widget.produk.lstSatuan!.indexWhere(
       (e) => e.id == widget.idSatuan,
     );
-    dtSatuan = widget.produk.lstSatuan[idx].copyWith();
+    dtSatuan = widget.produk.lstSatuan![idx].copyWith();
 
     if (dtSatuan.tipe == 'D') {
       title = "Ubah Harga Satuan Dasar";

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:simplepos/models/data/produksat_model.dart';
 
@@ -7,15 +8,16 @@ class ProdukModel {
   String? namaProduk;
   List<String>? tag;
   int? stok;
-  List<ProdukSatModel> lstSatuan;
+  List<ProdukSatModel>? lstSatuan;
 
   ProdukModel({
     this.id,
     this.namaProduk,
-    this.tag = const [],
+    List<String>? tag,
     this.stok,
-    this.lstSatuan = const [],
-  });
+    List<ProdukSatModel>? lstSatuan,
+  }) : tag = tag ?? [],
+       lstSatuan = lstSatuan ?? [];
 
   factory ProdukModel.fromMap(Map<String, dynamic> map) => ProdukModel(
     id: map['id'],
@@ -34,7 +36,7 @@ class ProdukModel {
     "nama_item": namaProduk,
     "tag": jsonEncode(tag),
     "stok": stok,
-    "satuan": jsonEncode(lstSatuan.map((e) => e.toMap()).toList()),
+    "satuan": jsonEncode(lstSatuan!.map((e) => e.toMap()).toList()),
   };
 
   Map<String, dynamic> toDb() => {
@@ -54,15 +56,15 @@ class ProdukModel {
     return ProdukModel(
       id: id ?? this.id,
       namaProduk: namaProduk ?? this.namaProduk,
-      tag: tag ?? this.tag,
+      tag: tag ?? List<String>.from(this.tag!),
       stok: stok ?? this.stok,
-      lstSatuan: lstSatuan ?? this.lstSatuan,
+      lstSatuan: lstSatuan ?? this.lstSatuan!.map((e) => e.copyWith()).toList(),
     );
   }
 
   ProdukSatModel? getSatuanDasar() {
     try {
-      return lstSatuan.firstWhere((e) => e.tipe == 'D');
+      return lstSatuan!.firstWhere((e) => e.tipe == 'D');
     } catch (_) {
       return null;
     }
@@ -71,13 +73,20 @@ class ProdukModel {
   bool compare(ProdukModel other) {
     if (id != other.id) return false;
     if (namaProduk != other.namaProduk) return false;
+
     if (tag!.length != other.tag!.length) return false;
-    if (lstSatuan.length != other.lstSatuan.length) return false;
-    for (int i = 0; i < lstSatuan.length; i++) {
-      if (!lstSatuan[i].compare(other.lstSatuan[i])) {
+    for (int i = 0; i < tag!.length; i++) {
+      if (!tag!.contains(other.tag![i])) return false;
+    }
+    if (lstSatuan!.length != other.lstSatuan!.length) return false;
+    for (int i = 0; i < lstSatuan!.length; i++) {
+      if (!lstSatuan![i].compare(other.lstSatuan![i])) {
         return false;
       }
     }
-    return false;
+    log("sama");
+    return true;
   }
+
+  ProdukModel clear() => ProdukModel();
 }

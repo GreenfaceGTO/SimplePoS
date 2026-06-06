@@ -19,12 +19,12 @@ class ProdukDao {
         );
 
         // ambil satuan produk dari data update yang memiliki id
-        final satFromList = updatedData.lstSatuan
+        final satFromList = updatedData.lstSatuan!
             .where((e) => e.id != null)
             .map((e) => e.id)
             .toList();
 
-        log("$runtimeType : ${updatedData.lstSatuan.map((e) => e.toMap())}");
+        log("$runtimeType : ${updatedData.lstSatuan!.map((e) => e.toMap())}");
 
         // ambil satuan produk di db untuk dibandingkan dengan daftar satuan pada update
         final satFromDb = await txn.query(
@@ -49,7 +49,7 @@ class ProdukDao {
         }
 
         // looping satuan dari update data untuk menghapus data lama atau menambahkan data baru di db
-        for (var sat in updatedData.lstSatuan) {
+        for (var sat in updatedData.lstSatuan!) {
           if (sat.id != null) {
             await txn.update(
               TableScheme.tbItemSat,
@@ -102,7 +102,7 @@ class ProdukDao {
         data.id = idProduk;
 
         // insert data satuan
-        for (var sat in data.lstSatuan) {
+        for (var sat in data.lstSatuan!) {
           sat.idProduk = idProduk;
           final satId = await txn.insert(TableScheme.tbItemSat, sat.toDb());
           sat.id = satId;
