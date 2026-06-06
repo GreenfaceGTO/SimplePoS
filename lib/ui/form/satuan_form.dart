@@ -4,11 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
+import 'package:simplepos/services/utils/cache_manager.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
-class SatuanForm extends StatefulWidget {
-  const SatuanForm({super.key, required this.args});
+class SatuanForm extends StatefulWidget with CacheManager {
+  SatuanForm({super.key, required this.args});
   final ArgsModel args;
 
   @override
@@ -45,8 +46,11 @@ class _SatuanFormState extends State<SatuanForm> {
       } else {
         txtIsi.text = "1";
       }
-    } else {}
-    showSatDasarInfo = tipe == 'D';
+    } else {
+      if (tipe == "D") {
+        showSatDasarInfo = widget.getShowHideSatDasarInfo();
+      }
+    }
     super.initState();
   }
 
@@ -197,6 +201,7 @@ class _SatuanFormState extends State<SatuanForm> {
                                       controller: txtStok,
                                       keyboardType: TextInputType.number,
                                       textInputAction: TextInputAction.next,
+                                      onChanged: (val) {},
                                       decoration: InputDecoration(
                                         label: Text("Stok Awal"),
                                       ),
@@ -278,21 +283,37 @@ class _SatuanFormState extends State<SatuanForm> {
     );
   }
 
-  MaterialBanner _bannerInfo() {
+  Widget _bannerInfo() {
     return MaterialBanner(
-      contentTextStyle: TextStyle(color: Colors.white),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      contentTextStyle: TextStyle(
+        color: Colors.yellowAccent.shade100,
+        fontWeight: FontWeight.w400,
+      ),
+      forceActionsBelow: true,
+
       elevation: 3,
       backgroundColor: Colors.teal,
-      leading: Icon(Icons.info_outline, color: Colors.white),
-      content: Text("Satuan dasar bersifat permanen setelah disimpan."),
+      leading: Icon(
+        Icons.info_outline,
+        color: Colors.yellowAccent.shade100,
+        size: 35,
+        weight: 20,
+      ),
+      minActionBarHeight: 40,
+      content: Text(
+        "Satuan dasar bersifat permanen.\nTidak dapat diubah lagi setelah disimpan.",
+      ),
+
       actions: [
         TextButton(
           onPressed: () {
             setState(() {
               showSatDasarInfo = false;
+              widget.setShowHideSatDasarInfo(!showSatDasarInfo);
             });
           },
-          child: Text("OK", style: TextStyle(color: Colors.white)),
+          child: Text("OK, MENGERTI", style: TextStyle(color: Colors.white)),
         ),
       ],
     );

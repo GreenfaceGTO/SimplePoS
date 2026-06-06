@@ -8,6 +8,10 @@ const String appCRight = "©2026 Mitrasoft";
 
 const int appVersion = 1;
 
+// ========= Preference key ===========
+/// kunci untuk menyimpan show hide info pada halaman input satuan dasar
+const String pkShowSatDasarInfo = "satdasarinfo";
+
 // ====== Route Name ======
 const String rtLogin = "/login";
 const String rtRegister = "/register";

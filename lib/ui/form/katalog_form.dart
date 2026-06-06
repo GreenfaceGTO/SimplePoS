@@ -199,6 +199,7 @@ class _KatalogFormState extends State<KatalogForm> {
           if (value is ProdukSatModel) {
             if (value.tipe == 'D') {
               satDasar = value;
+              data!.stok = value.stok;
             } else {
               if (satLain.any(
                 (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
@@ -354,32 +355,34 @@ class _KatalogFormState extends State<KatalogForm> {
                           ...data!.lstSatuan!.skip(1).map((e) {
                             return _satuanLainCard(tema, e);
                           }),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: SizedBox(
-                            height: 45,
-                            child: OutlinedButton(
-                              onPressed: () async {
-                                ProdukSatModel? satKonv =
-                                    await Navigator.pushNamed(
-                                      context,
-                                      rtFormSatuan,
-                                      arguments: ArgsModel(
-                                        formMode: FormMode.input,
-                                        data: {
-                                          "nama_item": txtNama.text,
-                                          "sat_dasar": satDasar,
-                                        },
-                                      ),
-                                    );
-                                if (satKonv != null) {
-                                  updateField("satuan", value: satKonv);
-                                }
-                              },
-                              child: Text("Satuan Lainnya"),
+
+                        if (data!.lstSatuan!.length < 3)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: SizedBox(
+                              height: 45,
+                              child: OutlinedButton(
+                                onPressed: () async {
+                                  ProdukSatModel? satKonv =
+                                      await Navigator.pushNamed(
+                                        context,
+                                        rtFormSatuan,
+                                        arguments: ArgsModel(
+                                          formMode: FormMode.input,
+                                          data: {
+                                            "nama_item": txtNama.text,
+                                            "sat_dasar": satDasar,
+                                          },
+                                        ),
+                                      );
+                                  if (satKonv != null) {
+                                    updateField("satuan", value: satKonv);
+                                  }
+                                },
+                                child: Text("Satuan Lainnya"),
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -579,10 +582,6 @@ class _KatalogFormState extends State<KatalogForm> {
                 );
                 if (satuan != null) {
                   updateField("satuan", value: satuan);
-                  // setState(() {
-                  //   satDasar = satuan;
-
-                  // });
                 }
               }
             : null,

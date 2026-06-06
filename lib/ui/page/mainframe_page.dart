@@ -49,7 +49,10 @@ class _MainframePageState extends State<MainframePage> {
       builder: (context, prov, _) {
         return Scaffold(
           drawer: Menudrawer(),
-          appBar: AppBar(title: Text(appTitle), actions: []),
+          appBar: AppBar(title: Text(appTitle), actions: [
+           
+            ],
+          ),
 
           body: IndexedStack(
             index: prov.currentPage,

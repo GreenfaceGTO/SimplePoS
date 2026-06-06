@@ -13,6 +13,6 @@ Tidak jarang segmen usaha ini merugi karena produk yang disediakan tidak sesuai 
 Keterbatasan kontrol dan pengetahuan atas usaha ini yang seringkali membuat kebanyakan retail kecil timbul tenggelam. Sementara untuk menerapkan sistem manajemen yang terotomasi umumnya mereka dihadapkan pada mahalnya biaya software atau aplikasi manajemen retail. Ditambah lagi dengan minimnya pemahaman tentang teknologi komputasi. 
 
 ## Tujuan Produk
-Membantu para pelaku usaha retail kecil menengah dalam mengelola pencatatan usahanya
+Membantu para pelaku usaha retail kecil menengah dalam mengelola pencatatan usahanya sesederhana mungkin.
 
 ## Target Pengguna
