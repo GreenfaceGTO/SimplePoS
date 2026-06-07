@@ -10,7 +10,7 @@ import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
-import 'package:simplepos/ui/page/kategori_page.dart';
+import 'package:simplepos/ui/ref/kategori_page.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 import 'package:simplepos/ui/widget/reusable/hargasatuanbottomsheet.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
@@ -41,7 +41,6 @@ class _KatalogFormState extends State<KatalogForm> {
       data = oldData!.copyWith();
 
       txtNama.text = data!.namaProduk!;
-      // lstKategori = data!.tag!;
       satDasar = data!.getSatuanDasar();
       satDasar!.stok = data!.stok;
       satLain = data!.lstSatuan!.skip(1).toList();
@@ -341,7 +340,7 @@ class _KatalogFormState extends State<KatalogForm> {
           Text("Satuan & Harga", style: tema.textTheme.titleMedium),
           SizedBox(height: 16),
 
-          satDasar == null
+          data!.lstSatuan!.isEmpty
               ? _noSatDasarWidget(context)
               : Column(
                   mainAxisSize: MainAxisSize.min,
@@ -492,7 +491,10 @@ class _KatalogFormState extends State<KatalogForm> {
           ListTile(
             contentPadding: EdgeInsets.symmetric(vertical: 2),
             leading: Icon(Symbols.filter_1),
-            title: Text(satDasar!.satuan!, style: tema.textTheme.titleSmall),
+            title: Text(
+              data!.lstSatuan![0].satuan!,
+              style: tema.textTheme.titleSmall,
+            ),
             subtitle: Text("Satuan Dasar"),
             trailing: widget.args.formMode == FormMode.input
                 ? (satLain.isEmpty

@@ -3,12 +3,12 @@ import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/dummy_page.dart';
-import 'package:simplepos/ui/form/katalog_form.dart';
-import 'package:simplepos/ui/form/satuan_form.dart';
-import 'package:simplepos/ui/page/mainframe_page.dart';
-import 'package:simplepos/ui/page/katalogproduk_page.dart';
-import 'package:simplepos/ui/page/register_page.dart';
-import 'package:simplepos/ui/page/splashscreen_page.dart';
+import 'package:simplepos/ui/katalog/katalog_form.dart';
+import 'package:simplepos/ui/ref/satuan_form.dart';
+import 'package:simplepos/ui/mainframe_page.dart';
+import 'package:simplepos/ui/katalog/katalogproduk_page.dart';
+import 'package:simplepos/ui/portal/register_page.dart';
+import 'package:simplepos/ui/portal/splashscreen_page.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes = {

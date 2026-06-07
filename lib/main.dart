@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:simplepos/providers/providers.dart';
 import 'package:simplepos/services/utils/preferences.dart';
 import 'package:simplepos/services/utils/routes.dart';
-import 'package:simplepos/ui/page/splashscreen_page.dart';
+import 'package:simplepos/ui/portal/splashscreen_page.dart';
 import 'package:simplepos/ui/theme.dart';
 import 'package:intl/date_symbol_data_local.dart';
 

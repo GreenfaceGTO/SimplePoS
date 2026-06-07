@@ -42,13 +42,15 @@ class TableScheme {
 ''';
 
   static const createTbTranshd = '''CREATE TABLE $tbTranshd (
-    id      INTEGER PRIMARY KEY,
-    tanggal TEXT,
-    tipe    TEXT    CHECK (tipe IN ("beli", "jual") ),
-    total   REAL,
-    bayar   REAL,
-    kembali REAL,
-    status          CHECK (status IN ("pending", "selesai", "batal") ) 
+    id        INTEGER PRIMARY KEY,
+    tanggal   TEXT,
+    tipe      TEXT    CHECK (tipe IN ("beli", "jual") ),
+    total     REAL,
+    carabayar TEXT    CHECK (carabayar IN ("tunai", "qris") ),
+    bayar     REAL,
+    kembali   REAL,
+    status            CHECK (status IN ("pending", "selesai", "batal") ),
+    catatan   TEXT
 );
 ''';
 

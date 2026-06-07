@@ -67,7 +67,6 @@ class MasterProvider with ChangeNotifier {
   // =========inisialisasi provider=========
   Future<void> init() async {
     if (_initialized) return;
-    // TODO: semua master load disini
     _daftarProduk = await _masterDataRepo.fetchAllProduk();
     _daftarKategori = await buildKategoriList();
 

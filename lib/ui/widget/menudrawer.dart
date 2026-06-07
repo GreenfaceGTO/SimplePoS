@@ -29,6 +29,10 @@ class _MenudrawerState extends State<Menudrawer> {
       label: "Pembelian",
       icon: SvgPicture.asset("assets/svg/purchase.svg", width: 20, height: 20),
     ),
+    MenuModel(
+      label: "Pengaturan",
+      icon: SvgPicture.asset("assets/svg/settings.svg", width: 20, height: 20),
+    ),
   ];
   bool isLogoFileExist = false;
 

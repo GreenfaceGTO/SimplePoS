@@ -50,7 +50,7 @@ class ProdukSatModel {
   };
 
   Map<String, dynamic> toDb() => {
-    "id": id,
+    "id": null,
     "id_produk": idProduk,
     "satuan": satuan,
     "isi": isi,

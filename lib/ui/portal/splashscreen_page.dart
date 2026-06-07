@@ -8,8 +8,8 @@ import 'package:simplepos/providers/startup_provider.dart';
 import 'package:simplepos/services/startup_service.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/dummy_page.dart';
-import 'package:simplepos/ui/page/mainframe_page.dart';
-import 'package:simplepos/ui/page/register_page.dart';
+import 'package:simplepos/ui/mainframe_page.dart';
+import 'package:simplepos/ui/portal/register_page.dart';
 
 class SplashscreenPage extends StatefulWidget {
   const SplashscreenPage({super.key});
