@@ -13,13 +13,33 @@ class KasirTabpage extends StatefulWidget {
 }
 
 class _KasirTabpageState extends State<KasirTabpage> {
+  final _txtSearchCtr = TextEditingController();
+
+  @override
+  void dispose() {
+    _txtSearchCtr.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeData tema = Theme.of(context);
 
+    final masterProv = Provider.of<MasterProvider>(context);
+    final querySearch = _txtSearchCtr.text.trim().toLowerCase();
+
+    final filteredProduct = masterProv.daftarProduk.where((p) {
+      final cocokNama = p.namaProduk!.toLowerCase().contains(querySearch);
+      final cocokbarcode = p.lstSatuan!.any(
+        (sat) => sat.barcode!.contains(querySearch),
+      );
+
+      return cocokNama || cocokbarcode;
+    }).toList();
+
     return Consumer<MasterProvider>(
       builder: (context, prov, _) {
-        return prov.daftarProduk.isEmpty
+        return filteredProduct.isEmpty
             ? _emptyDataBody(tema)
             : Column(
                 children: [
@@ -27,9 +47,12 @@ class _KasirTabpageState extends State<KasirTabpage> {
                     padding: EdgeInsets.symmetric(vertical: 4, horizontal: 12),
                     height: 60,
                     child: TextFormField(
+                      controller: _txtSearchCtr,
+                      onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
                         hintText: "Cari...",
                         prefixIcon: Icon(Icons.search),
+
                         suffixIcon: IconButton(
                           onPressed: () {},
                           icon: Icon(Icons.qr_code_scanner_outlined),
@@ -44,7 +67,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
                           vertical: 8,
                           horizontal: 12,
                         ),
-                        itemCount: prov.daftarProduk.length,
+                        itemCount: filteredProduct.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 8,
@@ -52,7 +75,9 @@ class _KasirTabpageState extends State<KasirTabpage> {
                           childAspectRatio: 7 / 10,
                         ),
                         itemBuilder: (context, idx) {
-                          final item = prov.daftarProduk[idx];
+                          final item = filteredProduct[idx];
+
+                          // prov.daftarProduk[idx];
                           return _itemCard(item, context);
                         },
                       ),

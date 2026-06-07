@@ -6,9 +6,9 @@ import 'package:simplepos/models/menu_model.dart';
 import 'package:simplepos/providers/main_provider.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
-import 'package:simplepos/ui/mainframe/dashboard_tabpage.dart';
-import 'package:simplepos/ui/mainframe/history_tabpage.dart';
-import 'package:simplepos/ui/mainframe/kasir_tabpage.dart';
+import 'package:simplepos/ui/tabpage/dashboard_tabpage.dart';
+import 'package:simplepos/ui/tabpage/history_tabpage.dart';
+import 'package:simplepos/ui/tabpage/kasir_tabpage.dart';
 import 'package:simplepos/ui/widget/menudrawer.dart';
 
 class MainframePage extends StatefulWidget {

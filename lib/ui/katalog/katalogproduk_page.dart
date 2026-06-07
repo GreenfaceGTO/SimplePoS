@@ -19,6 +19,15 @@ class KatalogProdukPage extends StatefulWidget {
 }
 
 class _KatalogProdukPageState extends State<KatalogProdukPage> {
+  bool searchMode = false;
+  final _txtSearchCtr = TextEditingController();
+
+  @override
+  void dispose() {
+    _txtSearchCtr.dispose();
+    super.dispose();
+  }
+
   void deleteProduk(ProdukModel produk) async {
     bool? confirm = await showDialog(
       context: context,
@@ -56,91 +65,141 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData tema = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Katalog Produk"),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.search))],
-      ),
-      floatingActionButton: FloatingActionButton(
-        heroTag: "masterproduk",
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            rtFormKatalogProduk,
-            arguments: ArgsModel(formMode: FormMode.input),
-          );
-        },
-        child: Icon(Icons.add),
-      ),
-      body: Consumer<MasterProvider>(
-        builder: (context, prov, _) {
-          return prov.daftarProduk.isEmpty
-              ? Center(child: EmptydataElement())
-              : _listData(prov, tema);
-        },
-      ),
-    );
-  }
+    final mstProv = Provider.of<MasterProvider>(context);
+    final query = _txtSearchCtr.text.trim().toLowerCase();
+    final filteredItem = mstProv.daftarProduk.where((p) {
+      final cocokNama = p.namaProduk!.toLowerCase().contains(query);
+      final cocokBarcode = p.lstSatuan!.any(
+        (sat) => sat.barcode!.contains(query),
+      );
+      return cocokNama || cocokBarcode;
+    }).toList();
 
-  ListView _listData(MasterProvider prov, ThemeData tema) {
-    return ListView(
-      padding: EdgeInsets.symmetric(horizontal: 12),
-      children: prov.daftarProduk.map((item) {
-        return Container(
-          margin: EdgeInsets.symmetric(vertical: 4),
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            border: Border.all(color: Colors.teal, width: 0.5),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.namaProduk!,
-                      style: tema.textTheme.titleSmall,
-                      softWrap: true,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+    ThemeData tema = Theme.of(context);
+
+    return PopScope(
+      canPop: !searchMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _txtSearchCtr.clear();
+        searchMode = false;
+        setState(() {});
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: searchMode
+              ? TextFormField(
+                  controller: _txtSearchCtr,
+                  autofocus: true,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    hintText: "Cari...",
+                    prefixIcon: Icon(Icons.search),
+                    suffixIcon: _txtSearchCtr.text.isNotEmpty
+                        ? IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _txtSearchCtr.clear();
+                              });
+                            },
+                            icon: Icon(Icons.clear_rounded),
+                          )
+                        : null,
                   ),
-                  _popMenuProduk(item),
-                ],
+                )
+              : Text("Katalog Produk"),
+          actions: [
+            !searchMode
+                ? IconButton(
+                    onPressed: () {
+                      setState(() {
+                        searchMode = !searchMode;
+                      });
+                    },
+                    icon: Icon(Icons.search),
+                  )
+                : SizedBox(width: 16),
+          ],
+        ),
+        floatingActionButton: searchMode
+            ? null
+            : FloatingActionButton(
+                heroTag: "masterproduk",
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    rtFormKatalogProduk,
+                    arguments: ArgsModel(formMode: FormMode.input),
+                  );
+                },
+                child: Icon(Icons.add),
               ),
-              Divider(height: 3),
-              Row(
-                children: [
-                  _satuanDasar(item, tema),
-                  SizedBox(
-                    height: 60,
-                    child: VerticalDivider(
-                      thickness: 0.5,
-                      color: Colors.black26,
+        body: filteredItem.isEmpty
+            ? Center(child: EmptydataElement(caption: "Tidak ada data"))
+            :
+              // list of product
+              ListView(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                children: filteredItem.map((item) {
+                  return Container(
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      border: Border.all(color: Colors.teal, width: 0.5),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ),
-                  _stok(item, tema),
-                ],
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 45,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item.namaProduk!,
+                                  style: tema.textTheme.titleSmall,
+                                  softWrap: true,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              searchMode ? SizedBox() : _popMenuProduk(item),
+                            ],
+                          ),
+                        ),
+                        Divider(height: 3),
+                        Row(
+                          children: [
+                            _satuanDasar(item, tema),
+                            SizedBox(
+                              height: 60,
+                              child: VerticalDivider(
+                                thickness: 0.5,
+                                color: Colors.black26,
+                              ),
+                            ),
+                            _stok(item, tema),
+                          ],
+                        ),
+                        Divider(height: 3),
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _satuanLain(tema, item),
+                              VerticalDivider(),
+                              _kategori(tema, item),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
-              Divider(height: 3),
-              IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _satuanLain(tema, item),
-                    VerticalDivider(),
-                    _kategori(tema, item),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+      ),
     );
   }
 
