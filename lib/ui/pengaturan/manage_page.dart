@@ -1,40 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
+import 'package:simplepos/services/utils/constant.dart';
 
-class ManageTabpage extends StatefulWidget {
-  const ManageTabpage({super.key});
+class ManagePage extends StatefulWidget {
+  const ManagePage({super.key});
 
   @override
-  State<ManageTabpage> createState() => _ManageTabpageState();
+  State<ManagePage> createState() => _ManagePageState();
 }
 
-class _ManageTabpageState extends State<ManageTabpage> {
+class _ManagePageState extends State<ManagePage> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        ListTile(
-          visualDensity: VisualDensity(),
-          onTap: () {},
-          leading: Icon(Symbols.inventory_2),
-          title: Text("Kelola Katalog"),
-          // subtitle: Text("Tambah - Ubah - Hapus data produk"),
-        ),
-        ListTile(
-          visualDensity: VisualDensity(),
-          onTap: () {},
-          leading: Icon(Symbols.shopping_basket),
-          title: Text("Pembelian"),
-          // subtitle: Text("Tambah - Ubah - Hapus data produk"),
-        ),
-        ListTile(
-          visualDensity: VisualDensity(),
-          onTap: () {},
-          leading: Icon(Symbols.check_alert),
-          title: Text("Stok Opname"),
-          // subtitle: Text("Tambah - Ubah - Hapus data produk"),
-        ),
-      ],
+    return Scaffold(
+      appBar: AppBar(title: Text("Pengaturan")),
+      body: ListView(
+        children: [
+          ListTile(
+            visualDensity: VisualDensity(),
+            onTap: () {},
+            leading: Icon(Symbols.price_change),
+            title: Text("Aturan Harga Produk"),
+            // subtitle: Text("Tambah - Ubah - Hapus data produk"),
+          ),
+        ],
+      ),
     );
   }
 }

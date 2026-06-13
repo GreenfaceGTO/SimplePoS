@@ -277,6 +277,16 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
                 ),
               ),
             ),
+            if (item.lstSatuan![0].barcode!.isNotEmpty)
+              CustomRowField(
+                title: "Barcode :",
+                value: Text(
+                  item.lstSatuan![0].barcode!,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
             CustomRowField(
               title: "Harga Pokok :",
               value: Text(

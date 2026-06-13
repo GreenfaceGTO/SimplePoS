@@ -12,7 +12,6 @@ import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
 import 'package:simplepos/ui/ref/kategori_page.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
-import 'package:simplepos/ui/widget/reusable/hargasatuanbottomsheet.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class KatalogForm extends StatefulWidget {
@@ -123,6 +122,7 @@ class _KatalogFormState extends State<KatalogForm> {
           data!.lstSatuan!.removeWhere(
             (e) => e.satuan!.toLowerCase() == satuan.satuan!.toLowerCase(),
           );
+          satLain.removeWhere((e) => e.satuan == satuan.satuan);
         } else {
           data!.lstSatuan!.clear();
         }
@@ -227,28 +227,9 @@ class _KatalogFormState extends State<KatalogForm> {
       canPop: canPop(),
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        final keluar = await showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text("Konfirmasi"),
-            content: Text("Perubahan belum disimpan!! Keluar tanpa menyimpan?"),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx, true);
-                },
-                child: Text("KELUAR"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(ctx, false);
-                },
-                child: Text("BATAL"),
-              ),
-            ],
-          ),
-        );
-        if (keluar != null && keluar && context.mounted) {
+        final keluar = await PublicWidget.discardChange(context);
+
+        if (keluar && context.mounted) {
           Navigator.pop(context);
         }
       },
@@ -349,6 +330,7 @@ class _KatalogFormState extends State<KatalogForm> {
                     Divider(),
                     Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (satLain.isNotEmpty)
                           ...data!.lstSatuan!.skip(1).map((e) {
@@ -356,29 +338,32 @@ class _KatalogFormState extends State<KatalogForm> {
                           }),
 
                         if (data!.lstSatuan!.length < 3)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: SizedBox(
-                              height: 45,
-                              child: OutlinedButton(
-                                onPressed: () async {
-                                  ProdukSatModel? satKonv =
-                                      await Navigator.pushNamed(
-                                        context,
-                                        rtFormSatuan,
-                                        arguments: ArgsModel(
-                                          formMode: FormMode.input,
-                                          data: {
-                                            "nama_item": txtNama.text,
-                                            "sat_dasar": satDasar,
-                                          },
-                                        ),
-                                      );
-                                  if (satKonv != null) {
-                                    updateField("satuan", value: satKonv);
-                                  }
-                                },
-                                child: Text("Satuan Lainnya"),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: SizedBox(
+                                height: 45,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    ProdukSatModel? satKonv =
+                                        await Navigator.pushNamed(
+                                          context,
+                                          rtFormSatuan,
+                                          arguments: ArgsModel(
+                                            formMode: FormMode.input,
+                                            data: {
+                                              "nama_item": txtNama.text,
+                                              "satuan_dasar": satDasar,
+                                              "target_data": null,
+                                            },
+                                          ),
+                                        );
+                                    if (satKonv != null) {
+                                      updateField("satuan", value: satKonv);
+                                    }
+                                  },
+                                  child: Text("Satuan Lainnya"),
+                                ),
                               ),
                             ),
                           ),
@@ -400,7 +385,14 @@ class _KatalogFormState extends State<KatalogForm> {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "Satuan Lain",
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(vertical: 2),
             leading: Icon(Icons.compare_arrows_outlined),
@@ -408,16 +400,8 @@ class _KatalogFormState extends State<KatalogForm> {
               "${e.satuan} (${e.isi} ${satDasar!.satuan!})",
               style: tema.textTheme.titleSmall,
             ),
-            trailing: IconButton(
-              onPressed: () {
-                deleteSatuan(e);
-              },
-              icon: Icon(
-                Icons.delete_forever_outlined,
-                size: 18,
-                color: Colors.red,
-              ),
-            ),
+            subtitle: e.barcode!.isEmpty ? null : Text(e.barcode!),
+            trailing: _popmenuSatuanLain(e),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 40),
@@ -460,6 +444,58 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
+  PopupMenuButton<String> _popmenuSatuanLain(ProdukSatModel satuan) {
+    return PopupMenuButton(
+      onSelected: (val) async {
+        if (val == '/edit') {
+          log(satuan.toMap().toString());
+          final satLainCopy = satuan.copyWith();
+          ProdukSatModel? satuanLain = await Navigator.pushNamed(
+            context,
+            rtFormSatuan,
+            arguments: ArgsModel(
+              formMode: FormMode.update,
+              data: {
+                "nama_item": txtNama.text,
+                "satuan_dasar": satDasar,
+                "target_data": satLainCopy,
+              },
+            ),
+          );
+          if (satuanLain != null) {
+            int idx = data!.lstSatuan!.indexWhere(
+              (e) => e.satuan == satuanLain.satuan,
+            );
+            data!.lstSatuan![idx] = satuanLain;
+            satLain.clear();
+            satLain.addAll(data!.lstSatuan!);
+            setState(() {});
+          }
+        } else {
+          deleteSatuan(satuan);
+        }
+      },
+      itemBuilder: (context) {
+        return [
+          PopupMenuItem(
+            value: "/edit",
+            child: ListTile(
+              leading: Icon(Icons.edit, size: 18),
+              title: Text("Edit"),
+            ),
+          ),
+          PopupMenuItem(
+            value: "/hapus",
+            child: ListTile(
+              leading: Icon(Icons.delete_forever, color: Colors.red, size: 18),
+              title: Text("Hapus", style: TextStyle(color: Colors.red)),
+            ),
+          ),
+        ];
+      },
+    );
+  }
+
   void updateHarga(ProdukSatModel updatedData) {
     satDasar = updatedData;
     data!.lstSatuan!.clear();
@@ -488,6 +524,12 @@ class _KatalogFormState extends State<KatalogForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            "Satuan Dasar",
+            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(vertical: 2),
             leading: Icon(Symbols.filter_1),
@@ -495,35 +537,12 @@ class _KatalogFormState extends State<KatalogForm> {
               data!.lstSatuan![0].satuan!,
               style: tema.textTheme.titleSmall,
             ),
-            subtitle: Text("Satuan Dasar"),
-            trailing: widget.args.formMode == FormMode.input
-                ? (satLain.isEmpty
-                      ? (IconButton(
-                          onPressed: () {
-                            deleteSatuan(satDasar!);
-                          },
-                          icon: Icon(
-                            Icons.delete_forever_outlined,
-                            size: 18,
-                            color: Colors.red,
-                          ),
-                        ))
-                      : null)
-                : IconButton(
-                    tooltip: "Ubah Harga",
-                    onPressed: () async {
-                      final result = await Hargasatuanbottomsheet.show(
-                        context: context,
-                        produk: data!,
-                        idSatuan: satDasar!.id!,
-                      );
-                      if (result != null) {
-                        updateHarga(result);
-                      }
-                    },
-                    icon: Icon(Icons.edit, size: 18, color: tema.primaryColor),
-                  ),
+            subtitle: data!.lstSatuan![0].barcode!.isEmpty
+                ? null
+                : Text(data!.lstSatuan![0].barcode!),
+            trailing: _popmenuSatuanDasar(),
           ),
+
           Padding(
             padding: const EdgeInsets.only(left: 40),
             child: Row(
@@ -567,6 +586,64 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
+  PopupMenuButton<String> _popmenuSatuanDasar() {
+    return PopupMenuButton(
+      onSelected: (val) async {
+        if (val == "/edit") {
+          final copiedSat = satDasar!.copyWith();
+          ProdukSatModel? newSatDasar = await Navigator.pushNamed(
+            context,
+            rtFormSatuan,
+            arguments: ArgsModel(
+              formMode: FormMode.update,
+              data: {
+                "nama_item": txtNama.text,
+                "satuan_dasar": satDasar,
+                "target_data": copiedSat,
+              },
+            ),
+          );
+          if (newSatDasar != null) {
+            setState(() {
+              satDasar = newSatDasar;
+              data!.lstSatuan![0] = newSatDasar;
+            });
+          }
+        } else {
+          deleteSatuan(satDasar!);
+        }
+      },
+      itemBuilder: (context) {
+        return [
+          PopupMenuItem(
+            value: "/edit",
+            child: ListTile(
+              leading: Icon(Icons.edit, size: 18),
+              title: Text("Edit"),
+            ),
+          ),
+          PopupMenuItem(
+            enabled: satLain.isEmpty,
+            value: "/hapus",
+            child: ListTile(
+              leading: Icon(
+                Icons.delete_forever,
+                size: 18,
+                color: satLain.isEmpty ? Colors.red : Colors.grey,
+              ),
+              title: Text(
+                "Hapus",
+                style: TextStyle(
+                  color: satLain.isEmpty ? Colors.red : Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ];
+      },
+    );
+  }
+
   /// Widget jika belum ada satuan sama sekali
   SizedBox _noSatDasarWidget(BuildContext context) {
     return SizedBox(
@@ -579,7 +656,11 @@ class _KatalogFormState extends State<KatalogForm> {
                   rtFormSatuan,
                   arguments: ArgsModel(
                     formMode: FormMode.input,
-                    data: {"nama_item": txtNama.text, "sat_dasar": null},
+                    data: {
+                      "nama_item": txtNama.text,
+                      "satuan_dasar": null,
+                      "target_data": null,
+                    },
                   ),
                 );
                 if (satuan != null) {

@@ -4,6 +4,7 @@ import 'package:simplepos/models/data/produksat_model.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/dummy_page.dart';
 import 'package:simplepos/ui/katalog/katalog_form.dart';
+import 'package:simplepos/ui/pengaturan/manage_page.dart';
 import 'package:simplepos/ui/ref/satuan_form.dart';
 import 'package:simplepos/ui/mainframe_page.dart';
 import 'package:simplepos/ui/katalog/katalogproduk_page.dart';
@@ -16,6 +17,7 @@ class AppRoutes {
     rtLogin: (_) => DummyPage(caption: "Login"),
     rtRegister: (_) => RegisterPage(),
     rtMasterProduk: (_) => KatalogProdukPage(),
+    rtSettings: (_) => ManagePage(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings setting) {

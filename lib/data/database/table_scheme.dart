@@ -42,27 +42,30 @@ class TableScheme {
 ''';
 
   static const createTbTranshd = '''CREATE TABLE $tbTranshd (
-    id        INTEGER PRIMARY KEY,
-    tanggal   TEXT,
-    tipe      TEXT    CHECK (tipe IN ("beli", "jual") ),
-    total     REAL,
-    carabayar TEXT    CHECK (carabayar IN ("tunai", "qris") ),
-    bayar     REAL,
-    kembali   REAL,
-    status            CHECK (status IN ("pending", "selesai", "batal") ),
-    catatan   TEXT
+    id         INTEGER PRIMARY KEY,
+    tanggal    TEXT,
+    tipe       TEXT    CHECK (tipe IN ("beli", "jual") ),
+    total      REAL,
+    cara_bayar TEXT    CHECK (cara_bayar IN ('tunai', 'qris') ),
+    bayar      REAL,
+    kembali    REAL,
+    status             CHECK (status IN ("pending", "selesai", "batal") ),
+    catatan    TEXT
 );
 ''';
 
   static const createTbTransdt = '''CREATE TABLE $tbTransdt (
-    id        INTEGER PRIMARY KEY,
-    id_header INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE
-                      CONSTRAINT [id_header,id_item] UNIQUE,
-    id_item   INTEGER REFERENCES tb_item (id),
-    qty       INTEGER,
-    harga     REAL,
-    diskon    REAL
+    id          INTEGER PRIMARY KEY,
+    id_header   INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE
+                        CONSTRAINT [id_header,id_item] UNIQUE,
+    id_item     INTEGER REFERENCES tb_item (id),
+    nama_item   TEXT,
+    id_satuan   INTEGER REFERENCES tb_itemsat (id),
+    nama_satuan TEXT,
+    isi         INTEGER,
+    harga       REAL,
+    qty         INTEGER,
+    diskon      REAL
 );
-
 ''';
 }

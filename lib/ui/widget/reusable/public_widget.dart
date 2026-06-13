@@ -9,6 +9,32 @@ import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
 
 class PublicWidget {
+  // ====== Meampilkan jendela konfirmasi ketika user ingin menutup halaman tapi data yang sedang di edit belum disimpan ========
+  static Future<bool> discardChange(BuildContext context) async {
+    return await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text("Konfirmasi"),
+            content: Text("Perubahan belum disimpan!! Keluar tanpa menyimpan?"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx, true);
+                },
+                child: Text("KELUAR"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx, false);
+                },
+                child: Text("BATAL"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
   // ====== Widget Logo Aplikasi ======
   static Widget appLogo({double size = 120}) => SizedBox(
     width: size,

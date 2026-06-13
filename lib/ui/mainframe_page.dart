@@ -49,8 +49,19 @@ class _MainframePageState extends State<MainframePage> {
       builder: (context, prov, _) {
         return Scaffold(
           drawer: Menudrawer(),
-          appBar: AppBar(title: Text(appTitle), actions: [
-           
+          appBar: AppBar(
+            title: Text(appTitle),
+            actions: [
+              if (prov.currentPage == 1)
+                Badge(
+                  alignment: Alignment.topRight,
+                  offset: Offset(-8, 10),
+                  label: Text("1"),
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.shopping_cart, size: 18),
+                  ),
+                ),
             ],
           ),
 

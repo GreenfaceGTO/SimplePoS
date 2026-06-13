@@ -129,6 +129,7 @@ class ProdukDao {
       for (var item in lstProduk) {
         final satuan = await getSatuanProduk(item.id!);
         item.lstSatuan = satuan;
+        item.lstSatuan!.sort((a, b) => a.isi.compareTo(b.isi));
       }
       return lstProduk;
     } catch (e) {

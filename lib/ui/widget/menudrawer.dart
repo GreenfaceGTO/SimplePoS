@@ -42,6 +42,8 @@ class _MenudrawerState extends State<Menudrawer> {
         Navigator.pushNamed(context, rtMasterProduk);
 
         break;
+      case "Pengaturan":
+        Navigator.pushNamed(context, rtSettings);
       default:
     }
   }
