@@ -1,3 +1,5 @@
+import 'package:simplepos/models/data/produksat_model.dart';
+
 class ItemtransaksiModel {
   int? id;
   int? idTransaksi;
@@ -33,6 +35,13 @@ class ItemtransaksiModel {
         harga: map['harga'],
         qty: map['qty'],
         diskon: map['diskon'],
+      );
+
+  factory ItemtransaksiModel.fromProdukSat(ProdukSatModel item) =>
+      ItemtransaksiModel(
+        namaSatuan: item.satuan,
+        isi: item.isi,
+        harga: item.hJual,
       );
 
   Map<String, dynamic> toMap() => {

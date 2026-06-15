@@ -603,7 +603,9 @@ class _KatalogFormState extends State<KatalogForm> {
               },
             ),
           );
+          log("$runtimeType : here");
           if (newSatDasar != null) {
+            log(newSatDasar.toMap().toString());
             setState(() {
               satDasar = newSatDasar;
               data!.lstSatuan![0] = newSatDasar;

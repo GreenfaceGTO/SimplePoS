@@ -267,8 +267,18 @@ class _KasirTabpageState extends State<KasirTabpage> {
             ),
           ),
           IconButton(
-            onPressed: () {
-              Trxsatuanbottomsheet.selectSatuan(context: context, item: item);
+            onPressed: () async {
+              final result = await Trxsatuanbottomsheet.selectSatuan(
+                context: context,
+                item: item,
+              );
+              if (result != null) {
+                log(result.toMap().toString());
+              }
+              // if (item.lstSatuan!.length > 1) {
+              // } else {
+              //   log("masukkan jumlah");
+              // }
             },
             icon: Icon(Icons.add_shopping_cart, size: 18),
           ),

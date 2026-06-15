@@ -60,6 +60,7 @@ class _SatuanFormState extends State<SatuanForm> {
   }
 
   void _prepareForInput(Map data) {
+    targetData = ProdukSatModel();
     if (data['satuan_dasar'] != null) {
       tipe = "K";
       satDasar = data['satuan_dasar'];
@@ -163,8 +164,8 @@ class _SatuanFormState extends State<SatuanForm> {
                       hPokok: double.parse(txtHpokok.text),
                       hJual: double.parse(txtHJual.text),
                     );
-                    Navigator.pop(context, retVal);
                     // log(retVal.toMap().toString());
+                    Navigator.pop(context, retVal);
                   }
                 } else {
                   PublicWidget.showMessage(
@@ -279,6 +280,8 @@ class _SatuanFormState extends State<SatuanForm> {
                                         keyboardType: TextInputType.number,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (val) {
+                                          if (val.isEmpty) return;
+
                                           _updateField(
                                             "stok",
                                             value: int.parse(val),

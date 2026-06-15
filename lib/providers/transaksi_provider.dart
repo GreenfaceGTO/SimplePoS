@@ -5,12 +5,13 @@ import 'package:simplepos/models/data/transaksi_model.dart';
 class TransaksiProvider with ChangeNotifier {
   final TransaksiRepo _transaksiRepo = TransaksiRepo();
 
-  List<TransaksiModel> _lstHistoryTrx = [];
+  /// variabel daftar transaksi hari ini
+  List<TransaksiModel> _lstTodayTrx = [];
   List<TransaksiModel> _lstPendingTrx = [];
 
   bool _isLoading = false;
 
-  List<TransaksiModel> get daftarRiwayatTrx => _lstHistoryTrx;
+  List<TransaksiModel> get daftarTrxHariIni => _lstTodayTrx;
   List<TransaksiModel> get daftarPendingTrx => _lstPendingTrx;
 
   bool get isLoading => _isLoading;
