@@ -92,6 +92,7 @@ class ProdukSatModel {
         isi == other.isi &&
         barcode == other.barcode &&
         hPokok == other.hPokok &&
-        hJual == other.hJual;
+        hJual == other.hJual &&
+        stok == other.stok;
   }
 }

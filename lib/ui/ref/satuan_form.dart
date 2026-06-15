@@ -127,8 +127,7 @@ class _SatuanFormState extends State<SatuanForm> {
 
   bool canPop() {
     if (widget.args.formMode == FormMode.input) return true;
-    log("sat Dasar : ${satDasar!.toMap()}");
-    log("target Data : ${targetData!.toMap()}");
+
     bool retVal = targetData!.compare(oldData!);
 
     return retVal;

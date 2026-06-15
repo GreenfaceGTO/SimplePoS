@@ -130,7 +130,7 @@ class MasterProvider with ChangeNotifier {
   // =========== Mengupdate produk =============
   Future<bool> updateProduk(ProdukModel updatedProduk) async {
     try {
-      log(updatedProduk.toMap().toString());
+      log("$runtimeType : ${updatedProduk.toMap().toString()}");
       final result = await _masterDataRepo.updateProduk(updatedProduk);
       int idx = _daftarProduk.indexWhere((e) => e.id == result.id);
       _daftarProduk[idx] = result;

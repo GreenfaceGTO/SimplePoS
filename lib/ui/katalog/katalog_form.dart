@@ -177,7 +177,6 @@ class _KatalogFormState extends State<KatalogForm> {
 
     if (data == null) return false;
     bool retval = data!.compare(oldData!);
-    log("$runtimeType : result $retval");
     return retval;
   }
 
@@ -198,6 +197,7 @@ class _KatalogFormState extends State<KatalogForm> {
           if (value is ProdukSatModel) {
             if (value.tipe == 'D') {
               satDasar = value;
+              data!.lstSatuan![0] = value;
               data!.stok = value.stok;
             } else {
               if (satLain.any(
@@ -496,21 +496,21 @@ class _KatalogFormState extends State<KatalogForm> {
     );
   }
 
-  void updateHarga(ProdukSatModel updatedData) {
-    satDasar = updatedData;
-    data!.lstSatuan!.clear();
-    data!.lstSatuan!.add(satDasar!);
+  // void updateHarga(ProdukSatModel updatedData) {
+  //   satDasar = updatedData;
+  //   data!.lstSatuan!.clear();
+  //   data!.lstSatuan!.add(satDasar!);
 
-    double hPokok = satDasar!.hPokok!;
-    double hJual = satDasar!.hJual!;
-    for (var sat in satLain) {
-      sat.hPokok = hPokok * sat.isi;
-      sat.hJual = hJual * sat.isi;
-      data!.lstSatuan!.add(sat);
-    }
+  //   double hPokok = satDasar!.hPokok!;
+  //   double hJual = satDasar!.hJual!;
+  //   for (var sat in satLain) {
+  //     sat.hPokok = hPokok * sat.isi;
+  //     sat.hJual = hJual * sat.isi;
+  //     data!.lstSatuan!.add(sat);
+  //   }
 
-    setState(() {});
-  }
+  //   setState(() {});
+  // }
 
   // Widget khusus untuk menampilkan satuan dasar
   Container _satDasar(ThemeData tema) {
@@ -605,11 +605,12 @@ class _KatalogFormState extends State<KatalogForm> {
           );
           log("$runtimeType : here");
           if (newSatDasar != null) {
-            log(newSatDasar.toMap().toString());
-            setState(() {
-              satDasar = newSatDasar;
-              data!.lstSatuan![0] = newSatDasar;
-            });
+            updateField('satuan', value: newSatDasar);
+            // log(newSatDasar.toMap().toString());
+            // setState(() {
+            //   satDasar = newSatDasar;
+            //   data!.lstSatuan![0] = newSatDasar;
+            // });
           }
         } else {
           deleteSatuan(satDasar!);
