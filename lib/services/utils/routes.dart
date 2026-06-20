@@ -10,6 +10,7 @@ import 'package:simplepos/ui/mainframe_page.dart';
 import 'package:simplepos/ui/katalog/katalogproduk_page.dart';
 import 'package:simplepos/ui/portal/register_page.dart';
 import 'package:simplepos/ui/portal/splashscreen_page.dart';
+import 'package:simplepos/ui/transaksi/cart_page.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
@@ -18,6 +19,7 @@ class AppRoutes {
     rtRegister: (_) => RegisterPage(),
     rtMasterProduk: (_) => KatalogProdukPage(),
     rtSettings: (_) => ManagePage(),
+    rtCartPage: (_) => CartPage(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings setting) {

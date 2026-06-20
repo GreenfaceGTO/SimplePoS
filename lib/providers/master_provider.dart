@@ -28,14 +28,28 @@ class MasterProvider with ChangeNotifier {
   List<String> get daftarKategori => _daftarKategori;
   List<String> get daftarSatuan => _daftarSatuan;
 
-  // =========================
-  // REFERENSI SETTER
-  // =========================
+  ///  mengupdate stok (lokal), [value] adalah nilai yang akan merubah stok
+  /// jika [tambah]=true, maka akan ditambahkan, sebaliknya akan mengurangi
+  void updateStok(int itemId, int value, {bool tambah = false}) {
+    for (var item in _daftarProduk) {
+      if (item.id == itemId) {
+        if (tambah) {
+          item.stok = item.stok! + value;
+        } else {
+          item.stok = item.stok! - value;
+        }
+      }
+    }
+    notifyListeners();
+  }
+
+  // set data usaha
   void setUsahaData(UsahaModel data) {
     _dataUsaha = data;
     notifyListeners();
   }
 
+  // menambahkan kategori (lokal)
   void addNewKategori(String value) {
     if (!_daftarKategori.contains(value)) {
       _daftarKategori.add(value);
@@ -49,6 +63,7 @@ class MasterProvider with ChangeNotifier {
     }
   }
 
+  // Menambahkan satuan (lokal)
   Future<bool> addNewSatuan(String value) async {
     if (!_daftarSatuan.contains(value)) {
       _daftarSatuan.add(value);

@@ -53,12 +53,19 @@ class ProdukModel {
     int? stok,
     List<ProdukSatModel>? lstSatuan,
   }) {
+    final pStok = stok ?? this.stok;
+    final newLstSatuan = (lstSatuan ?? this.lstSatuan)!.map((dt) {
+      if (dt.tipe == "D") {
+        return dt.copyWith(stok: pStok);
+      }
+      return dt;
+    }).toList();
     return ProdukModel(
       id: id ?? this.id,
       namaProduk: namaProduk ?? this.namaProduk,
       tag: tag ?? List<String>.from(this.tag!),
       stok: stok ?? this.stok,
-      lstSatuan: lstSatuan ?? this.lstSatuan!.map((e) => e.copyWith()).toList(),
+      lstSatuan: newLstSatuan,
     );
   }
 

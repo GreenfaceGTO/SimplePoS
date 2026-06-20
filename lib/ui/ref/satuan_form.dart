@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
@@ -270,7 +268,19 @@ class _SatuanFormState extends State<SatuanForm> {
                                       : null,
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              tipe == 'K'
+                                  ? Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      child: Text(
+                                        "(${satDasar!.satuan!.toUpperCase()})",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    )
+                                  : SizedBox(width: 8),
 
                               Expanded(
                                 child: tipe == "D"
@@ -312,6 +322,7 @@ class _SatuanFormState extends State<SatuanForm> {
                                     ),
                                   ),
                                   onChanged: (val) {
+                                    if (val.isEmpty) return;
                                     _updateField(
                                       "hpkoko",
                                       value: double.parse(val),
@@ -347,6 +358,7 @@ class _SatuanFormState extends State<SatuanForm> {
                                     label: Text("Harga Jual"),
                                   ),
                                   onChanged: (val) {
+                                    if (val.isEmpty) return;
                                     _updateField(
                                       "hjual",
                                       value: double.parse(val),

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/args_model.dart';
@@ -165,7 +163,7 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              searchMode ? SizedBox() : _popMenuProduk(item),
+                              _popMenuProduk(item),
                             ],
                           ),
                         ),
@@ -314,11 +312,13 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
 
             break;
           case "/edit":
-            log("$runtimeType: ${produk.toMap().toString()}");
             Navigator.pushNamed(
               context,
               rtFormKatalogProduk,
-              arguments: ArgsModel(formMode: FormMode.update, data: produk),
+              arguments: ArgsModel(
+                formMode: FormMode.update,
+                data: produk.copyWith(),
+              ),
             );
             break;
           default:

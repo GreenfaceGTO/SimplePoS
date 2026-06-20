@@ -81,65 +81,85 @@ class _DashboardTabpageState extends State<DashboardTabpage> {
               style: tema.textTheme.titleLarge!.copyWith(fontSize: 30),
             ),
           ),
-          Container(
-            margin: EdgeInsets.fromLTRB(12, 4, 12, 8),
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black45, width: 0.3),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          _trendPenjualan(tema),
+          _summaryCard(
+            tema,
+            leadingIcon: Icon(Icons.wallet_membership, color: Colors.indigo),
+            title: "Riwayat Mutasi Saldo",
+            trailling: Text("Lihat Semua"),
             child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Trend Penjualan", style: tema.textTheme.titleMedium),
-                    Container(
-                      // padding: EdgeInsets.all(4),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        border: Border.all(color: Colors.black45, width: 0.3),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            decoration: BoxDecoration(color: Colors.teal),
-                            child: Text(
-                              "Jam",
-                              style: tema.textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
+              children: List.generate(5, (index) {
+                return ListTile(
+                  shape: RoundedRectangleBorder(side: BorderSide()),
+                  title: Text("Jenis Mutasi $index"),
+                  subtitle: Text("Header Transaksi $index"),
+                  trailing: Text("Jlh Mutasi $index"),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                          Container(
-                            padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                            decoration: BoxDecoration(color: null),
-                            child: Text(
-                              "Hari",
-                              style: tema.textTheme.bodySmall!.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
+  Container _trendPenjualan(ThemeData tema) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(12, 4, 12, 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black45, width: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Trend Penjualan", style: tema.textTheme.titleMedium),
+              Container(
+                // padding: EdgeInsets.all(4),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  border: Border.all(color: Colors.black45, width: 0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      decoration: BoxDecoration(color: Colors.teal),
+                      child: Text(
+                        "Jam",
+                        style: tema.textTheme.bodySmall!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+
+                    Container(
+                      padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                      decoration: BoxDecoration(color: null),
+                      child: Text(
+                        "Hari",
+                        style: tema.textTheme.bodySmall!.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
-                Container(
-                  decoration: BoxDecoration(border: Border.all()),
-                  width: double.infinity,
-                  height: 300,
-                  child: Center(child: Text("Grafik")),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Container(
+            decoration: BoxDecoration(border: Border.all()),
+            width: double.infinity,
+            height: 300,
+            child: Center(child: Text("Grafik")),
           ),
         ],
       ),
@@ -180,7 +200,7 @@ class _DashboardTabpageState extends State<DashboardTabpage> {
             ],
           ),
           SizedBox(height: 10),
-          Text(title),
+          Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
           child,
         ],
       ),

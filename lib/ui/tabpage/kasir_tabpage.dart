@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
+import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/ui/transaksi/trxsatuanbottomsheet.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
@@ -17,11 +19,35 @@ class KasirTabpage extends StatefulWidget {
 
 class _KasirTabpageState extends State<KasirTabpage> {
   final _txtSearchCtr = TextEditingController();
+  late TransaksiProvider trxProv;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      trxProv = Provider.of<TransaksiProvider>(context, listen: false);
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
     _txtSearchCtr.dispose();
     super.dispose();
+  }
+
+  Future<void> newItemAdded(ItemtransaksiModel newDetail) async {
+    // final trxProv = Provider.of<TransaksiProvider>(context);
+    log("$runtimeType : ${newDetail.toMap().toString()}");
+    if (trxProv.currentTransaksi == null) {
+      if (await trxProv.addNewTransaksi(newDetail)) {
+        PublicWidget.showMessage(
+          message:
+              "${newDetail.qty} item ${newDetail.namaProduk} ditambahkan ke keranjang",
+        );
+      }
+    } else {
+      log("$runtimeType : Tambahkan detail pada current transaksi");
+    }
   }
 
   @override
@@ -90,7 +116,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 8 / 10,
+                          childAspectRatio: 8 / 9,
                         ),
                         itemBuilder: (context, idx) {
                           final item = filteredProduct[idx];
@@ -147,39 +173,25 @@ class _KasirTabpageState extends State<KasirTabpage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "1 ${item.lstSatuan![0].satuan}",
-                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                          fontWeight: FontWeight.w600,
+                      if (item.lstSatuan![0].barcode != null)
+                        Text(
+                          item.lstSatuan![0].barcode!,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
                       Text(
                         PublicWidget.toRupiah.format(item.lstSatuan![0].hJual),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
-                      if (item.lstSatuan![0].barcode != null)
-                        Text(item.lstSatuan![0].barcode!),
-                    ],
-                  ),
-                ),
-
-                InkWell(
-                  onTap: item.lstSatuan!.length > 1
-                      ? () {
-                          _showSatuanLain(item);
-                        }
-                      : null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "Satuan Lainnya...",
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: item.lstSatuan!.length > 1
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.grey.shade500,
-                        fontWeight: FontWeight.w700,
+                      Text(
+                        "/${item.lstSatuan![0].satuan!.toUpperCase()}",
+                        style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],
@@ -190,51 +202,6 @@ class _KasirTabpageState extends State<KasirTabpage> {
           _itemCardFooter(item, context),
         ],
       ),
-    );
-  }
-
-  void _showSatuanLain(ProdukModel item) async {
-    return showModalBottomSheet(
-      showDragHandle: true,
-      context: context,
-      builder: (ctx) {
-        return Container(
-          width: double.maxFinite,
-          padding: EdgeInsets.fromLTRB(12, 0, 12, 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Satuan Lain"),
-              Text(
-                item.namaProduk!,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              Divider(),
-              ...item.lstSatuan!.skipWhile((e) => e.tipe == "D").map((sat) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "1 ${sat.satuan!} (${sat.isi} ${item.lstSatuan![0].satuan})",
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ),
-                      Text(
-                        PublicWidget.toRupiah.format(sat.hJual),
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              SizedBox(height: 16),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -273,12 +240,9 @@ class _KasirTabpageState extends State<KasirTabpage> {
                 item: item,
               );
               if (result != null) {
-                log(result.toMap().toString());
+                // log("$runtimeType : ${result.toMap().toString()}");
+                newItemAdded(result);
               }
-              // if (item.lstSatuan!.length > 1) {
-              // } else {
-              //   log("masukkan jumlah");
-              // }
             },
             icon: Icon(Icons.add_shopping_cart, size: 18),
           ),

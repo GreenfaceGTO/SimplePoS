@@ -6,6 +6,7 @@ class ItemtransaksiModel {
   int? idProduk;
   String? namaProduk;
   int? idSatuan;
+
   String? namaSatuan;
   int? isi;
   double? harga;
@@ -30,7 +31,9 @@ class ItemtransaksiModel {
         id: map['id'],
         idTransaksi: map['id_header'],
         idProduk: map["id_item"],
-        namaProduk: map['nama_satuan'],
+        namaProduk: map['nama_item'],
+        idSatuan: map['id_satuan'],
+        namaSatuan: map['nama_satuan'],
         isi: map['isi'],
         harga: map['harga'],
         qty: map['qty'],
@@ -41,6 +44,7 @@ class ItemtransaksiModel {
       ItemtransaksiModel(
         namaSatuan: item.satuan,
         isi: item.isi,
+        idSatuan: item.id,
         harga: item.hJual,
       );
 
@@ -48,6 +52,8 @@ class ItemtransaksiModel {
     "id": id,
     "id_header": idTransaksi,
     "id_item": idProduk,
+    "nama_item": namaProduk,
+    "id_satuan": idSatuan,
     "nama_satuan": namaSatuan,
     "isi": isi,
     "harga": harga,

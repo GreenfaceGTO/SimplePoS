@@ -49,9 +49,10 @@ class TableScheme {
     cara_bayar TEXT    CHECK (cara_bayar IN ('tunai', 'qris') ),
     bayar      REAL,
     kembali    REAL,
-    status             CHECK (status IN ("pending", "selesai", "batal") ),
+    status     TEXT    CHECK (status IN ("draft", "pending", "selesai", "batal") ),
     catatan    TEXT
 );
+
 ''';
 
   static const createTbTransdt = '''CREATE TABLE $tbTransdt (

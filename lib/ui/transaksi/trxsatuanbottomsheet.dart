@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
@@ -60,6 +61,7 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
       itemTidakCukup = true;
     });
     Future.delayed(Duration(seconds: 2), () {
+      if (!mounted) return;
       setState(() {
         itemTidakCukup = false;
       });
@@ -79,11 +81,11 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          Text("Pilih Kemasan", style: Theme.of(context).textTheme.bodyLarge),
           Text(
             widget.item.namaProduk!,
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          Text("Pilih Kemasan", style: Theme.of(context).textTheme.bodyLarge),
           SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -111,7 +113,17 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
           SizedBox(
             height: 45,
             child: OutlinedButton.icon(
-              onPressed: () {},
+              onPressed: () {
+                final trxItem = ItemtransaksiModel.fromProdukSat(
+                  widget.item.lstSatuan![selectedIndex],
+                );
+                trxItem.namaProduk = widget.item.namaProduk!;
+                trxItem.idProduk = widget.item.id;
+
+                trxItem.qty = lstQuantity[selectedIndex];
+
+                Navigator.pop(context, trxItem);
+              },
               label: Text("MASUKKAN KERANJANG"),
               icon: Icon(Icons.add_shopping_cart),
             ),
@@ -142,12 +154,19 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
         children: [
           InkWell(
             onTap: () {
-              if (sat.isi < widget.item.stok!) {
+              if (sat.tipe == 'D') {
                 setState(() {
                   selectedIndex = lstSatuan.indexOf(sat);
                 });
               } else {
-                showErrorMessage();
+                final stok = widget.item.stok;
+                if (stok! >= sat.isi) {
+                  setState(() {
+                    selectedIndex = lstSatuan.indexOf(sat);
+                  });
+                } else {
+                  showErrorMessage();
+                }
               }
             },
             child: Column(
@@ -162,12 +181,28 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        sat.satuan!,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              sat.satuan!,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: true,
+                            ),
+                          ),
+                          Text(
+                            sat.tipe == 'D'
+                                ? ""
+                                : "(${sat.isi} ${widget.item.lstSatuan![0].satuan})",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
                       ),
                       Text(
                         PublicWidget.toRupiah.format(sat.hJual),
@@ -216,7 +251,9 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
     if (sat.tipe == 'D') {
       return lstQuantity[idx] < widget.item.stok!;
     } else {
-      return (lstQuantity[idx] * sat.isi) < widget.item.stok!;
+      final sisa = widget.item.stok! - (lstQuantity[idx] * sat.isi);
+      log("sisa konversi $sisa");
+      return sisa >= sat.isi;
     }
   }
 

@@ -42,7 +42,10 @@ class Dbmanager {
     int newVersion,
   ) async {
     if (oldVersion < 2) {
-      log("Meningkatkan versi database...");
+      log("upgrading database...");
+      // await db.execute(
+      //   'ALTER TABLE ${TableScheme.tbItemSat} ADD COLUMN stok INTEGER',
+      // );
     }
   }
 }

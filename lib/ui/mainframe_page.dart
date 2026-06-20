@@ -5,6 +5,7 @@ import 'package:simplepos/models/args_model.dart';
 import 'package:simplepos/models/menu_model.dart';
 import 'package:simplepos/providers/main_provider.dart';
 import 'package:simplepos/providers/master_provider.dart';
+import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/tabpage/dashboard_tabpage.dart';
 import 'package:simplepos/ui/tabpage/history_tabpage.dart';
@@ -39,12 +40,15 @@ class _MainframePageState extends State<MainframePage> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<MasterProvider>().loadDataUsaha();
+      context.read<TransaksiProvider>().loadTodayTransaksi();
     });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    // final trxProv = Provider.of<TransaksiProvider>(context);
+
     return Consumer<MainProvider>(
       builder: (context, prov, _) {
         return Scaffold(
@@ -53,14 +57,25 @@ class _MainframePageState extends State<MainframePage> {
             title: Text(appTitle),
             actions: [
               if (prov.currentPage == 1)
-                Badge(
-                  alignment: Alignment.topRight,
-                  offset: Offset(-8, 10),
-                  label: Text("1"),
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.shopping_cart, size: 18),
-                  ),
+                Consumer<TransaksiProvider>(
+                  builder: (context, trxProv, _) {
+                    return Badge(
+                      alignment: Alignment.topRight,
+                      offset: Offset(-8, 10),
+                      label: trxProv.currentTransaksi == null
+                          ? null
+                          : Text(
+                              trxProv.currentTransaksi!.lstDetail.length
+                                  .toString(),
+                            ),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, rtCartPage);
+                        },
+                        icon: Icon(Icons.shopping_cart, size: 18),
+                      ),
+                    );
+                  },
                 ),
             ],
           ),

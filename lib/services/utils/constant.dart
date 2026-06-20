@@ -20,6 +20,7 @@ const String rtSplash = "/splash";
 const String rtMasterProduk = "/masterproduk";
 const String rtKategoriPage = "/kategoripage";
 const String rtSettings = "/pengaturan";
+const String rtCartPage = "/keranjang";
 
 const String rtFormKatalogProduk = "formkatalogproduk";
 const String rtFormMasterKategori = "/formmasterkategori";

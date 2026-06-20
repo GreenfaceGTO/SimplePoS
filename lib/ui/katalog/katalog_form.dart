@@ -37,8 +37,11 @@ class _KatalogFormState extends State<KatalogForm> {
   void initState() {
     if (widget.args.formMode == FormMode.update) {
       oldData = widget.args.data;
+
       data = oldData!.copyWith();
 
+      log("data asli ${data!.lstSatuan!.map((e) => e.toMap()).toList()}");
+      log("hasil copy ${oldData!.lstSatuan!.map((e) => e.toMap()).toList()}");
       txtNama.text = data!.namaProduk!;
       satDasar = data!.getSatuanDasar();
       satDasar!.stok = data!.stok;
@@ -143,25 +146,25 @@ class _KatalogFormState extends State<KatalogForm> {
         mode: MessageMode.warning,
       );
     } else if (formKey.currentState!.validate()) {
-      // Menambahkan satuan dasar di awal daftar satuan sebelum satuan lainnya
-      List<ProdukSatModel> sat = [satDasar!];
+      // // Menambahkan satuan dasar di awal daftar satuan sebelum satuan lainnya
+      // List<ProdukSatModel> sat = [satDasar!];
 
-      // Looping variabel satLain lokal untuk di tambahkan di variabel sat, setelah satuan dasar
-      for (var satkov in satLain) {
-        if (!sat.contains(satkov)) {
-          sat.add(satkov);
-        }
-      }
+      // // Looping variabel satLain lokal untuk di tambahkan di variabel sat, setelah satuan dasar
+      // for (var satkov in satLain) {
+      //   if (!sat.contains(satkov)) {
+      //     sat.add(satkov);
+      //   }
+      // }
 
       // inisialisasi awal variabel selesai = gagal
       bool done = false;
 
       if (widget.args.formMode == FormMode.input) {
         // jika mode input, buat instance kelas produk dengan data dari form
-
         done = await context.read<MasterProvider>().addNewProduk(data!);
       } else {
         done = await context.read<MasterProvider>().updateProduk(data!);
+        // log(data!.toMap().toString());
       }
 
       if (done) {
@@ -175,8 +178,12 @@ class _KatalogFormState extends State<KatalogForm> {
   bool canPop() {
     if (widget.args.formMode == FormMode.input) return true;
 
-    if (data == null) return false;
+    if (data == null) {
+      return false;
+    }
+
     bool retval = data!.compare(oldData!);
+
     return retval;
   }
 
@@ -197,7 +204,12 @@ class _KatalogFormState extends State<KatalogForm> {
           if (value is ProdukSatModel) {
             if (value.tipe == 'D') {
               satDasar = value;
-              data!.lstSatuan![0] = value;
+              if (widget.args.formMode == FormMode.update) {
+                data!.lstSatuan![0] = value;
+              } else {
+                data!.lstSatuan!.add(value);
+              }
+
               data!.stok = value.stok;
             } else {
               if (satLain.any(
@@ -209,9 +221,9 @@ class _KatalogFormState extends State<KatalogForm> {
                 );
               } else {
                 satLain.add(value);
+                data!.lstSatuan!.add(value);
               }
             }
-            data!.lstSatuan!.add(value);
           }
         }
         break;

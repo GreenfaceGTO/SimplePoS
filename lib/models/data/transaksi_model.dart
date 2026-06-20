@@ -56,4 +56,16 @@ class TransaksiModel {
     "catatan": catatan,
     "detail": jsonEncode(lstDetail.map((e) => e.toMap()).toList()),
   };
+
+  Map<String, dynamic> toDb() => {
+    "id": id,
+    "tanggal": tanggal,
+    "tipe": tipe,
+    "total": total,
+    "cara_bayar": caraBayar,
+    "bayar": bayar,
+    "kembali": kembali,
+    "status": status,
+    "catatan": catatan,
+  };
 }

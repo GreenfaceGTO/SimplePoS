@@ -10,7 +10,7 @@ class ProdukDao {
   Future<ProdukModel> updateProduk(ProdukModel updatedData) async {
     final db = await Dbmanager.database;
     try {
-      return db.transaction((txn) async {
+      return await db.transaction((txn) async {
         await txn.update(
           TableScheme.tbItem,
           updatedData.toDb(),
@@ -97,7 +97,7 @@ class ProdukDao {
   Future<ProdukModel> addNewProduk(ProdukModel data) async {
     final db = await Dbmanager.database;
     try {
-      return db.transaction<ProdukModel>((txn) async {
+      return await db.transaction<ProdukModel>((txn) async {
         final idProduk = await txn.insert(TableScheme.tbItem, data.toDb());
         data.id = idProduk;
 
