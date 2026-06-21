@@ -33,6 +33,8 @@ class Dbmanager {
     await db.execute(TableScheme.createTbItemSat);
     await db.execute(TableScheme.createTbTranshd);
     await db.execute(TableScheme.createTbTransdt);
+    await db.execute(TableScheme.createTbMutasiStok);
+    await db.execute(TableScheme.createTbsaldo);
   }
 
   // =========Upgrade Database [jika ada]=========

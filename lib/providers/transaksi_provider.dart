@@ -27,6 +27,40 @@ class TransaksiProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  /// Menambahkan item detail transaksi baru
+  Future<void> addNewDetailToCart(ItemtransaksiModel data) async {
+    try {
+      final newTotal = _currentTransaksi!.total! + (data.qty! * data.harga!);
+      final result = await _transaksiRepo.addItemToCart(
+        data,
+        currentTransaksi!.total!,
+      );
+
+      // periksa jika item yang akan ditambahkan sudah ada di daftar detail transaksi
+      bool ada = _currentTransaksi!.lstDetail.any(
+        (e) => e.idProduk == data.idProduk,
+      );
+      if (ada) {
+        // item sudah ada, update jumlahnya
+        final idxDetail = _currentTransaksi!.lstDetail.indexWhere(
+          (e) => e.idProduk == data.idProduk,
+        );
+        final oldQty = _currentTransaksi!.lstDetail[idxDetail].qty;
+        final newQty = data.qty! + oldQty!;
+        _currentTransaksi!.lstDetail[idxDetail].qty = newQty;
+      } else {
+        // item belum ada, tambahkan
+        _currentTransaksi!.lstDetail.add(result);
+      }
+
+      // update total transaksi
+      _currentTransaksi!.total = newTotal;
+      notifyListeners();
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+  }
+
   /// Menghapus transaksi dalam keranjang (status = draft)
   Future<void> deleteCart() async {
     try {
@@ -85,15 +119,20 @@ class TransaksiProvider with ChangeNotifier {
   /// mengambil data transaksi hari ini
   Future<void> loadTodayTransaksi() async {
     _setLoading(true);
+    final today = DateTime.now();
     try {
-      final result = await _transaksiRepo.getTodayTrx();
+      final result = await _transaksiRepo.getTrxByThisPeriod();
       if (result.isNotEmpty) {
         _lstTodayTrx.addAll(result);
 
         // looping trx ini jika ada yang masih berstatus draf
         for (var item in _lstTodayTrx) {
           if (item.status == 'draft') {
-            _currentTransaksi = item;
+            if (item.tanggal == today.toIso8601String()) {
+              _currentTransaksi = item;
+            } else {
+              _lstPendingTrx.add(item);
+            }
           }
         }
         notifyListeners();

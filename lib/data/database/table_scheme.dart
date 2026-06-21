@@ -4,8 +4,12 @@ class TableScheme {
   static const tbItemSat = "tb_itemsat";
   static const tbTranshd = "tb_transhd";
   static const tbTransdt = "tb_transdt";
+  static const tbMutasiStok = 'tb_mutasistok';
+  static const tbSaldo = 'tb_saldo';
 
   static const createTbUsaha = '''CREATE TABLE $tbUsaha (
+    kode_usaha    TEXT,
+    tgl_register  TEXT,
     nama          TEXT,
     alamat        TEXT,
     owner_name    TEXT,
@@ -14,7 +18,6 @@ class TableScheme {
     reseller_code TEXT (6),
     logo_toko     TEXT
 );
-
 ''';
 
   static const createTbItem = '''CREATE TABLE $tbItem (
@@ -67,6 +70,28 @@ class TableScheme {
     harga       REAL,
     qty         INTEGER,
     diskon      REAL
+);
+''';
+
+  static const createTbMutasiStok = '''CREATE TABLE $tbMutasiStok (
+    id        INTEGER,
+    tanggal   TEXT,
+    pos_tipe  TEXT    CHECK (pos_tipe IN ('IN', 'OUT') ) 
+                      DEFAULT OUT,
+    id_item   INTEGER REFERENCES tb_item (id) ON DELETE CASCADE,
+    id_satuan INTEGER REFERENCES tb_itemsat (id) ON DELETE CASCADE,
+    qty       INTEGER,
+    nilai     REAL
+);
+''';
+
+  static const createTbsaldo = '''CREATE TABLE $tbSaldo (
+    id        INTEGER,
+    tanggal    TEXT,
+    pos_tipe   TEXT    CHECK (pos_tipe IN ('D', 'K') ) 
+                       DEFAULT K,
+    nilai      REAL,
+    keterangan TEXT
 );
 ''';
 }

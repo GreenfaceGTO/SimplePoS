@@ -11,6 +11,7 @@ import 'package:simplepos/ui/katalog/katalogproduk_page.dart';
 import 'package:simplepos/ui/portal/register_page.dart';
 import 'package:simplepos/ui/portal/splashscreen_page.dart';
 import 'package:simplepos/ui/transaksi/cart_page.dart';
+import 'package:simplepos/ui/transaksi/pending/pendinglist_page.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
@@ -20,6 +21,7 @@ class AppRoutes {
     rtMasterProduk: (_) => KatalogProdukPage(),
     rtSettings: (_) => ManagePage(),
     rtCartPage: (_) => CartPage(),
+    rtPendingPage: (_) => PendinglistPage(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings setting) {

@@ -46,7 +46,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
         );
       }
     } else {
-      log("$runtimeType : Tambahkan detail pada current transaksi");
+      trxProv.addNewDetailToCart(newDetail);
     }
   }
 

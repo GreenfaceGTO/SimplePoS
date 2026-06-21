@@ -21,6 +21,7 @@ const String rtMasterProduk = "/masterproduk";
 const String rtKategoriPage = "/kategoripage";
 const String rtSettings = "/pengaturan";
 const String rtCartPage = "/keranjang";
+const String rtPendingPage = "/pendingpage";
 
 const String rtFormKatalogProduk = "formkatalogproduk";
 const String rtFormMasterKategori = "/formmasterkategori";

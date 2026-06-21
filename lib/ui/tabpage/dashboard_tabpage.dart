@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/services/utils/extension.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
@@ -87,15 +89,47 @@ class _DashboardTabpageState extends State<DashboardTabpage> {
             leadingIcon: Icon(Icons.wallet_membership, color: Colors.indigo),
             title: "Riwayat Mutasi Saldo",
             trailling: Text("Lihat Semua"),
-            child: Column(
-              children: List.generate(5, (index) {
-                return ListTile(
-                  shape: RoundedRectangleBorder(side: BorderSide()),
-                  title: Text("Jenis Mutasi $index"),
-                  subtitle: Text("Header Transaksi $index"),
-                  trailing: Text("Jlh Mutasi $index"),
+            child: Consumer<MasterProvider>(
+              builder: (context, prov, _) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: prov.daftarMutasiSaldo.take(5).map((mts) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.black38, width: 0.3),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        title: Text(
+                          DateTime.parse(
+                            mts.tanggal!,
+                          ).toIndonesianDate(withTime: true),
+                          style: TextStyle(fontSize: 12, color: Colors.black54),
+                        ),
+                        subtitle: Text(
+                          mts.keterangan!,
+                          style: TextStyle(fontSize: 14),
+                        ),
+                        trailing: Text(
+                          PublicWidget.toRupiah.format(mts.nilai),
+                          style: TextStyle(
+                            color: mts.pos == "D" ? Colors.teal : Colors.red,
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  // List.generate(5, (index) {
+                  //   return ListTile(
+                  //     shape: RoundedRectangleBorder(side: BorderSide()),
+                  //     title: Text("Jenis Mutasi $index"),
+                  //     subtitle: Text("Header Transaksi $index"),
+                  //     trailing: Text("Jlh Mutasi $index"),
+                  //   );
+                  // }),
                 );
-              }),
+              },
             ),
           ),
         ],

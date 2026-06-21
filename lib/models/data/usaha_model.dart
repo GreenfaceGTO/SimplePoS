@@ -1,4 +1,6 @@
 class UsahaModel {
+  String? kodeusaha;
+  String? tglRegister;
   String? logoToko;
   String? namaUsaha;
   String? alamat;
@@ -7,6 +9,8 @@ class UsahaModel {
   String? password;
 
   UsahaModel({
+    this.kodeusaha,
+    this.tglRegister,
     this.logoToko,
     this.namaUsaha,
     this.alamat,
@@ -16,6 +20,8 @@ class UsahaModel {
   });
 
   factory UsahaModel.fromMap(Map<String, dynamic> map) => UsahaModel(
+    kodeusaha: map['kode_usaha'],
+    tglRegister: map['tgl_register'],
     logoToko: map['logo_toko'],
     namaUsaha: map['nama'],
     alamat: map['alamat'],
@@ -25,6 +31,8 @@ class UsahaModel {
   );
 
   Map<String, dynamic> toMap() => {
+    "kode_usaha": kodeusaha,
+    "tgl_register": tglRegister,
     "logo_toko": logoToko,
     "nama": namaUsaha,
     "alamat": alamat,

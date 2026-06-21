@@ -40,6 +40,8 @@ class _MainframePageState extends State<MainframePage> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<MasterProvider>().loadDataUsaha();
+      context.read<MasterProvider>().getMutasiSaldo();
+
       context.read<TransaksiProvider>().loadTodayTransaksi();
     });
     super.initState();
@@ -56,24 +58,51 @@ class _MainframePageState extends State<MainframePage> {
           appBar: AppBar(
             title: Text(appTitle),
             actions: [
+              // pending buket
+
+              // cart belanja
               if (prov.currentPage == 1)
                 Consumer<TransaksiProvider>(
                   builder: (context, trxProv, _) {
-                    return Badge(
-                      alignment: Alignment.topRight,
-                      offset: Offset(-8, 10),
-                      label: trxProv.currentTransaksi == null
-                          ? null
-                          : Text(
-                              trxProv.currentTransaksi!.lstDetail.length
-                                  .toString(),
-                            ),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, rtCartPage);
-                        },
-                        icon: Icon(Icons.shopping_cart, size: 18),
-                      ),
+                    return Row(
+                      children: [
+                        if (trxProv.daftarPendingTrx.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Badge(
+                                alignment: Alignment.topLeft,
+                                offset: Offset(-5, 0),
+                                label: Text(
+                                  trxProv.daftarPendingTrx.length.toString(),
+                                ),
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(context, rtPendingPage);
+                                  },
+                                  child: Icon(Icons.pending_actions),
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                            ],
+                          ),
+                        Badge(
+                          alignment: Alignment.topRight,
+                          offset: Offset(-8, 10),
+                          label: trxProv.currentTransaksi == null
+                              ? null
+                              : Text(
+                                  trxProv.currentTransaksi!.lstDetail.length
+                                      .toString(),
+                                ),
+                          child: IconButton(
+                            onPressed: () {
+                              Navigator.pushNamed(context, rtCartPage);
+                            },
+                            icon: Icon(Icons.shopping_cart, size: 18),
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),

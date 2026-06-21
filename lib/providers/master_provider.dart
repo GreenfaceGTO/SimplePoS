@@ -5,6 +5,7 @@ import 'package:simplepos/data/database/dao/produk_dao.dart';
 import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/data/repository/masterdata_repo.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/saldo_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
@@ -21,15 +22,33 @@ class MasterProvider with ChangeNotifier {
   List<ProdukModel> _daftarProduk = [];
   List<String> _daftarKategori = [];
   List<String> _daftarSatuan = [];
+  List<SaldoModel> _daftarMutasiSaldo = [];
 
   // =========getter=========
   UsahaModel? get dataUsaha => _dataUsaha;
   List<ProdukModel> get daftarProduk => _daftarProduk;
   List<String> get daftarKategori => _daftarKategori;
   List<String> get daftarSatuan => _daftarSatuan;
+  List<SaldoModel> get daftarMutasiSaldo => _daftarMutasiSaldo;
 
+  // ----------------------------------------
+  // Mengambil data mutasi saldo periode ini
+  // ----------------------------------------
+  Future<void> getMutasiSaldo() async {
+    try {
+      final result = await _masterDataRepo.getMutasiSaldo();
+      if (result.isEmpty) return;
+      _daftarMutasiSaldo.addAll(result);
+      notifyListeners();
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+  }
+
+  // ------------------------------------------------------------------------
   ///  mengupdate stok (lokal), [value] adalah nilai yang akan merubah stok
   /// jika [tambah]=true, maka akan ditambahkan, sebaliknya akan mengurangi
+  // ------------------------------------------------------------------------
   void updateStok(int itemId, int value, {bool tambah = false}) {
     for (var item in _daftarProduk) {
       if (item.id == itemId) {

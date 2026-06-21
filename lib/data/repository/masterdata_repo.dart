@@ -3,12 +3,22 @@ import 'dart:developer';
 import 'package:simplepos/data/database/dao/produk_dao.dart';
 import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/saldo_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 
 class MasterdataRepo {
   final UsahaDao usahaDao;
   final ProdukDao produkDao;
   MasterdataRepo({required this.usahaDao, required this.produkDao});
+
+  // ========= Mengambil daftar mutasi saldo periode ini ===========
+  Future<List<SaldoModel>> getMutasiSaldo() async {
+    try {
+      return await usahaDao.getMutasiSaldoByPeriod();
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
 
   // ====== Mengupdate produk ==========
   Future<ProdukModel> updateProduk(ProdukModel produk) async {
