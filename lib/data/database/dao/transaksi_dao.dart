@@ -6,17 +6,72 @@ import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
 
 class TransaksiDao {
+  // ----------------------------------
+  // Menghapus item dalam transaksi
+  // ----------------------------------
+  Future<bool> removeCartDetail(ItemtransaksiModel detail) async {
+    final db = await Dbmanager.database;
+    try {
+      return await db.transaction((txn) async {
+        final qty = detail.qty;
+        final subTotal = detail.qty! * detail.harga!;
+
+        // pulihkan stok
+        await txn.execute(
+          """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
+          [qty, detail.idProduk],
+        );
+
+        // hapus detail
+        await txn.delete(
+          TableScheme.tbTransdt,
+          where: "id=?",
+          whereArgs: [detail.id],
+        );
+
+        //  update total di header
+
+        await txn.execute(
+          """UPDATE ${TableScheme.tbTranshd} SET total=total-? WHERE id=?""",
+          [subTotal, detail.idTransaksi],
+        );
+
+        return true;
+      });
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // ------------------------------------------
+  // Merubah jumlah item di detail transaksi
+  // ------------------------------------------
+  Future<bool> updateTrxQty({
+    required ItemtransaksiModel data,
+    required int newValue,
+  }) async {
+    final db = await Dbmanager.database;
+    try {
+      return await db.transaction((txn) async {
+        // TODO: inibelum lengkap
+        return false;
+      });
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // ---------------------------------------------------------------------
   // Menambahkan detail transaksi ke transaksi dengan status draft
   // ---------------------------------------------------------------------
-  Future<ItemtransaksiModel> addDetailCart(
+  Future<ItemtransaksiModel> addItemToCart(
     // int idheader,
     ItemtransaksiModel newDetail,
     double currentTotal,
   ) async {
     final db = await Dbmanager.database;
-
     try {
+      log("$runtimeType: ${newDetail.toMap()}");
       return await db.transaction((txn) async {
         // tambahkan total dimemori saat ini dengan total dari item baru
         currentTotal = currentTotal + (newDetail.qty! * newDetail.harga!);
@@ -31,14 +86,30 @@ class TransaksiDao {
         );
 
         if (dtlTransaksi.isNotEmpty) {
+          // casting menjadi itemtransaksi
+          List<ItemtransaksiModel> lstItem = dtlTransaksi
+              .map((e) => ItemtransaksiModel.fromMap(e))
+              .toList();
+          final idx = lstItem.indexWhere(
+            (e) => e.idProduk == newDetail.idProduk,
+          );
+
+          // ambil id data detail
+          newDetail.id = lstItem[idx].id;
+          log("update");
+
           // jika detail item sudah ada, update untuk menambahkan jumlahnya
           await txn.execute(
             """UPDATE ${TableScheme.tbTransdt} SET qty=qty+? where id_item=? AND id_header=? """,
             [qty, newDetail.idProduk, newDetail.idTransaksi],
           );
         } else {
+          log("insert");
           //  jika detail item belum ada, insert
-          final newId = await txn.insert(TableScheme.tbItem, newDetail.toMap());
+          final newId = await txn.insert(
+            TableScheme.tbTransdt,
+            newDetail.toMap(),
+          );
           newDetail.id = newId;
         }
 
@@ -57,7 +128,8 @@ class TransaksiDao {
         return newDetail;
       });
     } catch (e) {
-      throw Exception(e.toString());
+      rethrow;
+      // throw Exception(e.toString());
     }
   }
 
@@ -98,14 +170,12 @@ class TransaksiDao {
   // menghapus data transaksi
   // --------------------------
   Future<bool> deleteTransaksi(TransaksiModel data) async {
-    log("mulai menghapus");
     final db = await Dbmanager.database;
 
     log(db.path);
 
     try {
       return await db.transaction((txn) async {
-        log("Masuk transaksi");
         // looping untuk memulihkan stok
         for (var detail in data.lstDetail) {
           final qty = detail.qty! * detail.isi!;
@@ -135,9 +205,10 @@ class TransaksiDao {
     }
   }
 
-  // ------------------------------------
-  // Mengambil data transaksi hari ini
-  // ------------------------------------
+  // ------------------------------------------------------------------------
+  // Mengambil data transaksi, jika parameter tahun dan bulan null
+  // maka periode ini yang akan diambil
+  // ------------------------------------------------------------------------
   Future<List<TransaksiModel>> getTrxForPeriode({
     int? tahun,
     int? bulan,

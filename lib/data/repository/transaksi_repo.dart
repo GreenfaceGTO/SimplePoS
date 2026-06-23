@@ -5,13 +5,26 @@ import 'package:simplepos/models/data/transaksi_model.dart';
 class TransaksiRepo {
   final TransaksiDao _transaksiDao = TransaksiDao();
 
+  // ---------------------------------
+  // Menghapus detail transaksi
+  // ---------------------------------
+  Future<bool> delCartDetail(ItemtransaksiModel detail) async {
+    try {
+      return await _transaksiDao.removeCartDetail(detail);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // ---------------------------------
   // Menambahkah detail transaksi
+  // ---------------------------------
   Future<ItemtransaksiModel> addItemToCart(
     ItemtransaksiModel newDetail,
     double currentTotal,
   ) async {
     try {
-      return await _transaksiDao.addDetailCart(newDetail, currentTotal);
+      return await _transaksiDao.addItemToCart(newDetail, currentTotal);
     } catch (e) {
       rethrow;
     }
@@ -44,10 +57,13 @@ class TransaksiRepo {
     }
   }
 
-  // Mengambil transaksi periode ini.
-  Future<List<TransaksiModel>> getTrxByThisPeriod() async {
+  // ------------------------------------------------------------------------
+  // Mengambil transaksi berdasarkan periode. secara default periode ini yang
+  // akan diambil jika parameter tahun dan bulan = null
+  // ------------------------------------------------------------------------
+  Future<List<TransaksiModel>> getTrxByPeriod({int? tahun, int? bulan}) async {
     try {
-      return await _transaksiDao.getTrxForPeriode();
+      return await _transaksiDao.getTrxForPeriode(tahun: tahun, bulan: bulan);
     } catch (e) {
       throw Exception(e.toString());
     }

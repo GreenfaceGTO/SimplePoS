@@ -83,7 +83,7 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
         children: [
           Text("Pilih Kemasan", style: Theme.of(context).textTheme.bodyLarge),
           Text(
-            widget.item.namaProduk!,
+            widget.item.namaProduk!.toUpperCase(),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           SizedBox(height: 24),

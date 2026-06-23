@@ -60,8 +60,7 @@ class TableScheme {
 
   static const createTbTransdt = '''CREATE TABLE $tbTransdt (
     id          INTEGER PRIMARY KEY,
-    id_header   INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE
-                        CONSTRAINT [id_header,id_item] UNIQUE,
+    id_header   INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE,
     id_item     INTEGER REFERENCES tb_item (id),
     nama_item   TEXT,
     id_satuan   INTEGER REFERENCES tb_itemsat (id),
@@ -69,7 +68,8 @@ class TableScheme {
     isi         INTEGER,
     harga       REAL,
     qty         INTEGER,
-    diskon      REAL
+    diskon      REAL,
+    UNIQUE (id_header,id_item)
 );
 ''';
 

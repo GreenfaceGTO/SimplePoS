@@ -116,7 +116,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
                           crossAxisCount: 2,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 8 / 9,
+                          childAspectRatio: 5 / 5,
                         ),
                         itemBuilder: (context, idx) {
                           final item = filteredProduct[idx];
@@ -137,6 +137,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.indigo.shade600, width: 0.3),
+        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),

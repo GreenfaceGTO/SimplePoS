@@ -27,19 +27,48 @@ class TransaksiProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  // -------------------------------
+  // Menghapus detail transaksi
+  // -------------------------------
+  Future<void> delCartDetail(ItemtransaksiModel detail) async {
+    final result = await _transaksiRepo.delCartDetail(detail);
+
+    if (!result) {
+      return;
+    }
+    // hapus data di local
+    _currentTransaksi!.lstDetail.removeWhere((e) => e.id == detail.id);
+
+    // update total
+    final subTotal = detail.qty! * detail.harga!;
+    _currentTransaksi!.total = _currentTransaksi!.total! - subTotal;
+
+    // update stok di master provider
+    masterProvider.updateStok(detail.idProduk!, detail.qty!, tambah: true);
+    notifyListeners();
+  }
+
+  // -------------------------------------------
   /// Menambahkan item detail transaksi baru
+  // -------------------------------------------
   Future<void> addNewDetailToCart(ItemtransaksiModel data) async {
     try {
       final newTotal = _currentTransaksi!.total! + (data.qty! * data.harga!);
+      data.idTransaksi = _currentTransaksi!.id!;
+      // log("$runtimeType: ${data.toMap()}");
       final result = await _transaksiRepo.addItemToCart(
         data,
         currentTransaksi!.total!,
       );
 
+      // pastikan data sudah memiliki id
+      data.id ??= result.id;
+
       // periksa jika item yang akan ditambahkan sudah ada di daftar detail transaksi
       bool ada = _currentTransaksi!.lstDetail.any(
         (e) => e.idProduk == data.idProduk,
       );
+
       if (ada) {
         // item sudah ada, update jumlahnya
         final idxDetail = _currentTransaksi!.lstDetail.indexWhere(
@@ -55,13 +84,19 @@ class TransaksiProvider with ChangeNotifier {
 
       // update total transaksi
       _currentTransaksi!.total = newTotal;
+
+      // updateStok
+      masterProvider.updateStok(data.idProduk!, data.qty!);
       notifyListeners();
     } catch (e) {
+      log(e.toString());
       PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
     }
   }
 
+  // -------------------------------------------------------
   /// Menghapus transaksi dalam keranjang (status = draft)
+  // -------------------------------------------------------
   Future<void> deleteCart() async {
     try {
       final result = await _transaksiRepo.deleteCart(currentTransaksi!);
@@ -86,7 +121,9 @@ class TransaksiProvider with ChangeNotifier {
     }
   }
 
+  // ----------------------------------------------------------------------------------------------------
   /// Menambahkan transaksi baru, metode ini dipanggil hanya saat user menambahkan item pertama ke dalam keranjang. Untuk item selanjutnya menggunakan metode [addOtherItemToTrx]
+  // ----------------------------------------------------------------------------------------------------
   Future<bool> addNewTransaksi(ItemtransaksiModel firstItem) async {
     var firstTotal = firstItem.harga! * (firstItem.isi! * firstItem.qty!);
 
@@ -109,27 +146,37 @@ class TransaksiProvider with ChangeNotifier {
           masterProvider.updateStok(sat.idProduk!, sat.qty! * sat.isi!);
         }
         notifyListeners();
+        return true;
       }
-      return true;
+      return false;
     } catch (e) {
       throw Exception(e.toString());
     }
   }
 
-  /// mengambil data transaksi hari ini
+  // -----------------------------------------------
+  /// Mengambil seluruh data transaksi hari ini
+  // -----------------------------------------------
   Future<void> loadTodayTransaksi() async {
     _setLoading(true);
     final today = DateTime.now();
     try {
-      final result = await _transaksiRepo.getTrxByThisPeriod();
+      final result = await _transaksiRepo.getTrxByPeriod();
       if (result.isNotEmpty) {
         _lstTodayTrx.addAll(result);
 
-        // looping trx ini jika ada yang masih berstatus draf
+        // looping daftar data transaksi untuk memeriksa jika masih ada yang berstatus draft.
+        // Jika ada, dan tanggal draft sama dengan hari ini serta tidak ada transaksi yang sedang aktif  (currentTransaksi==null), jadikan draft tersebut sebagai transaksi saat ini.
         for (var item in _lstTodayTrx) {
           if (item.status == 'draft') {
-            if (item.tanggal == today.toIso8601String()) {
-              _currentTransaksi = item;
+            final tglData = DateTime.parse(item.tanggal!);
+            final tglSama =
+                tglData.year == today.year &&
+                tglData.month == today.month &&
+                tglData.day == today.day;
+
+            if (tglSama) {
+              _currentTransaksi ??= item;
             } else {
               _lstPendingTrx.add(item);
             }

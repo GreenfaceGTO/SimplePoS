@@ -16,14 +16,18 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
-  late TransaksiProvider trxProv;
-
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      trxProv = Provider.of(context, listen: false);
-    });
     super.initState();
+  }
+
+  // Menghitung total belanja
+  double hitungTotalCart(TransaksiProvider trxProv) {
+    double total = 0;
+    for (var item in trxProv.currentTransaksi!.lstDetail) {
+      total += (item.qty! * item.harga!);
+    }
+    return total;
   }
 
   @override
@@ -43,7 +47,7 @@ class _CartPageState extends State<CartPage> {
                             children: prov.currentTransaksi!.lstDetail.map((
                               dtl,
                             ) {
-                              return _itemCard(dtl, context);
+                              return _itemCard(dtl, prov, context);
                             }).toList(),
                           ),
                         ),
@@ -72,7 +76,9 @@ class _CartPageState extends State<CartPage> {
                                 ),
                               ),
                               Text(
-                                "Rp.24.000,00",
+                                PublicWidget.toRupiah.format(
+                                  hitungTotalCart(prov),
+                                ),
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -91,8 +97,8 @@ class _CartPageState extends State<CartPage> {
                                   height: 45,
                                   child: OutlinedButton.icon(
                                     onPressed: () {},
-                                    label: Text("Tunda"),
-                                    icon: Icon(Icons.pending),
+                                    label: Text("Pending"),
+                                    icon: Icon(Icons.pending_actions),
                                   ),
                                 ),
                               ),
@@ -122,32 +128,37 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  void deleteItem(BuildContext context, ItemtransaksiModel data) async {
-    if (trxProv.currentTransaksi!.lstDetail.length > 1) {
-      log("delete item");
-    } else {
-      final confirm =
-          await confirmDelete(
-            data.id!,
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+  void deleteItem(
+    BuildContext context,
+    TransaksiProvider trxProv,
+    ItemtransaksiModel data,
+  ) async {
+    bool delTransaksi = trxProv.currentTransaksi!.lstDetail.length == 1;
+
+    final confirm =
+        await confirmDelete(
+          data.id!,
+          delTransaksi
+              ? Text(
                   "Menghapus item ${data.namaProduk!.trim()} ini akan membatalkan transaksi.\n",
+                )
+              : Text(
+                  "Anda ingin menghapus item ${data.namaProduk!.trim()} ini?",
                 ),
-                Text("Hapus Item ini ?"),
-              ],
-            ),
-          ) ??
-          false;
-      if (confirm) {
+        ) ??
+        false;
+
+    if (confirm) {
+      if (delTransaksi) {
         await trxProv.deleteCart();
         if (context.mounted) {
           Navigator.pop(context);
         }
+      } else {
+        await trxProv.delCartDetail(data);
       }
     }
+    // }
   }
 
   Future<bool?> confirmDelete(int idDetail, Widget content) async {
@@ -177,7 +188,11 @@ class _CartPageState extends State<CartPage> {
     return result;
   }
 
-  Container _itemCard(ItemtransaksiModel dtl, BuildContext context) {
+  Container _itemCard(
+    ItemtransaksiModel dtl,
+    TransaksiProvider trxProv,
+    BuildContext context,
+  ) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
@@ -207,7 +222,7 @@ class _CartPageState extends State<CartPage> {
               ),
               IconButton(
                 onPressed: () {
-                  deleteItem(context, dtl);
+                  deleteItem(context, trxProv, dtl);
                 },
                 icon: Icon(
                   Icons.delete_forever_outlined,

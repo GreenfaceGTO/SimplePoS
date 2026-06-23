@@ -7,6 +7,7 @@ import 'package:simplepos/providers/main_provider.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/services/utils/constant.dart';
+import 'package:simplepos/ui/fordebug/transaksi_browser.dart';
 import 'package:simplepos/ui/tabpage/dashboard_tabpage.dart';
 import 'package:simplepos/ui/tabpage/history_tabpage.dart';
 import 'package:simplepos/ui/tabpage/kasir_tabpage.dart';
@@ -58,53 +59,59 @@ class _MainframePageState extends State<MainframePage> {
           appBar: AppBar(
             title: Text(appTitle),
             actions: [
-              // pending buket
-
-              // cart belanja
+              Consumer<TransaksiProvider>(
+                builder: (context, trxProv, _) {
+                  return trxProv.daftarPendingTrx.isNotEmpty
+                      ? Badge(
+                          alignment: Alignment.topLeft,
+                          offset: Offset(8, 10),
+                          label: Text(
+                            trxProv.daftarPendingTrx.length.toString(),
+                          ),
+                          child: IconButton(
+                            tooltip: "Transaksi Tertunda",
+                            onPressed: () {
+                              Navigator.pushNamed(context, rtPendingPage);
+                            },
+                            icon: Icon(Icons.pending_actions),
+                          ),
+                        )
+                      : SizedBox();
+                },
+              ),
               if (prov.currentPage == 1)
                 Consumer<TransaksiProvider>(
                   builder: (context, trxProv, _) {
-                    return Row(
-                      children: [
-                        if (trxProv.daftarPendingTrx.isNotEmpty)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Badge(
-                                alignment: Alignment.topLeft,
-                                offset: Offset(-5, 0),
-                                label: Text(
-                                  trxProv.daftarPendingTrx.length.toString(),
-                                ),
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.pushNamed(context, rtPendingPage);
-                                  },
-                                  child: Icon(Icons.pending_actions),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                            ],
-                          ),
-                        Badge(
-                          alignment: Alignment.topRight,
-                          offset: Offset(-8, 10),
-                          label: trxProv.currentTransaksi == null
-                              ? null
-                              : Text(
-                                  trxProv.currentTransaksi!.lstDetail.length
-                                      .toString(),
-                                ),
-                          child: IconButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, rtCartPage);
-                            },
-                            icon: Icon(Icons.shopping_cart, size: 18),
-                          ),
-                        ),
-                      ],
+                    return Badge(
+                      alignment: Alignment.topRight,
+                      offset: Offset(-8, 10),
+                      label: trxProv.currentTransaksi == null
+                          ? null
+                          : Text(
+                              trxProv.currentTransaksi!.lstDetail.length
+                                  .toString(),
+                            ),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, rtCartPage);
+                        },
+                        icon: Icon(Icons.shopping_cart, size: 18),
+                      ),
                     );
                   },
+                ),
+
+              if (prov.currentPage == 2)
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TransaksiBrowser(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.browse_gallery),
                 ),
             ],
           ),

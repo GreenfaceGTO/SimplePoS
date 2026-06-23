@@ -134,7 +134,14 @@ class _MenudrawerState extends State<Menudrawer> {
               mstProv.dataUsaha!.namaUsaha!,
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            Text(mstProv.dataUsaha!.email!),
+            Text(
+              "ID: ${mstProv.dataUsaha!.kodeusaha!}",
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
       ),
