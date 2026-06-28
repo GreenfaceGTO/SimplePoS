@@ -2,15 +2,107 @@ import 'dart:developer';
 
 import 'package:simplepos/data/database/dbmanager.dart';
 import 'package:simplepos/data/database/table_scheme.dart';
+import 'package:simplepos/models/data/mutasistok_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/models/data/produksat_model.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class ProdukDao {
+  // --------------------------------------------------------
+  /// menghitung sisa mutasi saldo stok periode sebelumnya
+  /// [tahun] dan [bulan] adalah periode data stok yang akan
+  /// ditampilkan, maka stok awal dihitung sebelum periode
+  /// tersebut
+  // --------------------------------------------------------
+  Future<int> hitungSaldoAwal({
+    required int tahun,
+    required int bulan,
+    required int idProduk,
+  }) async {
+    final db = await Dbmanager.database;
+
+    // buat tanggal awal untuk peride ini
+    final today = DateTime(tahun, bulan, 1);
+
+    try {
+      final result = await db.rawQuery(
+        """
+        SELECT COALESCE(SUM(CASE WHEN pos_tipe='IN' THEN qty WHEN pos_tipe='OUT' THEN -qty END),0) as stok_awal 
+        FROM ${TableScheme.tbMutasiStok}
+        WHERE id_item=? AND tanggal<?
+        """,
+        [idProduk, today.toIso8601String()],
+      );
+
+      log(result.toString());
+
+      if (result.isEmpty) {
+        return 0;
+      } else {
+        return (result.first['stok_awal'] as num).toInt();
+      }
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // -----------------------------
+  // mengambil data mutasi stok
+  // -----------------------------
+  Future<List<MutasistokModel>> getMutasi({
+    required int idProduk,
+    required int tahun,
+    required int bulan,
+  }) async {
+    final db = await Dbmanager.database;
+
+    final awal = DateTime(tahun, bulan, 1);
+    final akhir = DateTime(tahun, bulan + 1, 1);
+    try {
+      final result = await db.query(
+        TableScheme.tbMutasiStok,
+        where: "id_item = ? AND (tanggal >= ? AND tanggal < ?)",
+        whereArgs: [idProduk, awal.toIso8601String(), akhir.toIso8601String()],
+      );
+
+      if (result.isEmpty) return [];
+      List<MutasistokModel> lstResult = result
+          .map((e) => MutasistokModel.fromMap(e))
+          .toList();
+      return lstResult;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // --------------------------------------------------------------
+  // update stok item
+  // metode ini digunakan saat user menambah atau mengurangi jumlah
+  // item dalam cart. jika parameter value bernilai positif maka stok
+  // ditambahkan, sebaliknya dikurangi
+  // --------------------------------------------------------------
+  Future<bool> updateItemStok({
+    required int idProduk,
+    required int value,
+  }) async {
+    final db = await Dbmanager.database;
+    try {
+      await db.execute(
+        """UPDATE ${TableScheme.tbItem} SET stok= stok+? WHERE id=?""",
+        [idProduk, value],
+      );
+      return true;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // ======== Mengupdate Produk ============
   Future<ProdukModel> updateProduk(ProdukModel updatedData) async {
     final db = await Dbmanager.database;
     try {
       return await db.transaction((txn) async {
+        // mengupdate data produk
         await txn.update(
           TableScheme.tbItem,
           updatedData.toDb(),
@@ -82,12 +174,22 @@ class ProdukDao {
     final db = await Dbmanager.database;
 
     try {
-      return await db.delete(
-            TableScheme.tbItem,
-            where: "id=?",
-            whereArgs: [data.id],
-          ) >
-          0;
+      return await db.transaction((txn) async {
+        // hapus detail
+        await txn.delete(
+          TableScheme.tbItemSat,
+          where: "id_produk=?",
+          whereArgs: [data.id],
+        );
+
+        // hapus header
+        await txn.delete(
+          TableScheme.tbItem,
+          where: "id=?",
+          whereArgs: [data.id],
+        );
+        return true;
+      });
     } catch (e) {
       throw Exception(e.toString());
     }
@@ -98,15 +200,32 @@ class ProdukDao {
     final db = await Dbmanager.database;
     try {
       return await db.transaction<ProdukModel>((txn) async {
+        log("$runtimeType: menambahkan produk baru pada master produk");
+
         final idProduk = await txn.insert(TableScheme.tbItem, data.toDb());
         data.id = idProduk;
 
+        log("$runtimeType: menambahkan satuan produk");
         // insert data satuan
         for (var sat in data.lstSatuan!) {
           sat.idProduk = idProduk;
           final satId = await txn.insert(TableScheme.tbItemSat, sat.toDb());
           sat.id = satId;
         }
+
+        // mencatat mutasi stok sebagai stok awal
+        final today = DateTime.now().toIso8601String();
+        final mutasi = MutasistokModel(
+          tanggal: today,
+          keterangan: "Inisialisasi stok awal",
+          pos: "IN",
+          idProduk: data.id,
+          idSatuan: data.lstSatuan![0].id,
+          qty: data.stok,
+          nilai: data.stok! * data.lstSatuan![0].hPokok!,
+        );
+        await updateMutasiStok(txn, mutasi);
+
         return data;
       });
     } catch (e) {
@@ -150,6 +269,16 @@ class ProdukDao {
           .map((e) => ProdukSatModel.fromMap(e))
           .toList();
       return lstSatuan;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<void> updateMutasiStok(Transaction txn, MutasistokModel mutasi) async {
+    try {
+      log("$runtimeType: Menambahkan mutasi stok : ${mutasi.toMap()}");
+
+      await txn.insert(TableScheme.tbMutasiStok, mutasi.toMap());
     } catch (e) {
       throw Exception(e.toString());
     }

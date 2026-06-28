@@ -4,10 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:simplepos/data/database/dao/produk_dao.dart';
 import 'package:simplepos/data/database/dao/usaha_dao.dart';
 import 'package:simplepos/data/repository/masterdata_repo.dart';
+import 'package:simplepos/models/data/mutasistok_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/models/data/saldo_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
 import 'package:simplepos/services/utils/enums.dart';
+import 'package:simplepos/services/utils/extension.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class MasterProvider with ChangeNotifier {
@@ -31,6 +33,52 @@ class MasterProvider with ChangeNotifier {
   List<String> get daftarSatuan => _daftarSatuan;
   List<SaldoModel> get daftarMutasiSaldo => _daftarMutasiSaldo;
 
+  // -------------------------------------
+  // Mengambil data mutasi stok produk
+  // -------------------------------------
+  Future<List<MutasistokModel>> getMutasiStok({
+    required int idProduk,
+    required int tahun,
+    required int bulan,
+  }) async {
+    try {
+      log("$runtimeType: fetch saldo awal sebelum periode ini");
+      // mengambil saldo akhir periode sebelumnya
+      final saldoAwal = await _masterDataRepo.getSaldoAkhirLalu(
+        tahun: tahun,
+        bulan: bulan,
+        idProduk: idProduk,
+      );
+
+      List<MutasistokModel> lstMutasi = [];
+      if (saldoAwal > 0) {
+        final periode = DateTime(tahun, bulan, 1);
+        final tglSebelumnya = periode.subtract(Duration(days: 1));
+        final mtsSaldo = MutasistokModel(
+          tanggal: tglSebelumnya.toIso8601String(),
+          keterangan: "SALDO AWAL",
+          idProduk: idProduk,
+          qty: saldoAwal,
+        );
+
+        lstMutasi.add(mtsSaldo);
+      }
+
+      log("$runtimeType: fetch mutasi stok");
+
+      final lstData = await _masterDataRepo.getMutasiStok(
+        idProduk: idProduk,
+        tahun: tahun,
+        bulan: bulan,
+      );
+      lstMutasi.addAll(lstData);
+      return lstMutasi;
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+    return [];
+  }
+
   // ----------------------------------------
   // Mengambil data mutasi saldo periode ini
   // ----------------------------------------
@@ -49,12 +97,14 @@ class MasterProvider with ChangeNotifier {
   ///  mengupdate stok (lokal), [value] adalah nilai yang akan merubah stok
   /// jika [tambah]=true, maka akan ditambahkan, sebaliknya akan mengurangi
   // ------------------------------------------------------------------------
-  void updateStok(int itemId, int value, {bool tambah = false}) {
+  void updateLocalStok(int itemId, int value, {bool tambah = false}) {
     for (var item in _daftarProduk) {
       if (item.id == itemId) {
         if (tambah) {
+          log("step 2 [$runtimeType]: Tambah $value stok di local");
           item.stok = item.stok! + value;
         } else {
+          log("step 2 [$runtimeType]: kurang $value stok di local");
           item.stok = item.stok! - value;
         }
       }

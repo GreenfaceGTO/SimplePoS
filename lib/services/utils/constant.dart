@@ -22,7 +22,24 @@ const String rtKategoriPage = "/kategoripage";
 const String rtSettings = "/pengaturan";
 const String rtCartPage = "/keranjang";
 const String rtPendingPage = "/pendingpage";
+const String rtMutasiStok = "/mutasistok";
 
 const String rtFormKatalogProduk = "formkatalogproduk";
 const String rtFormMasterKategori = "/formmasterkategori";
 const String rtFormSatuan = '/formsatuan';
+
+// ======== Daftar nama bulan =============
+List<String> lstNamaBulan = [
+  'Januari',
+  'Februari',
+  'Maret',
+  'April',
+  'Mei',
+  "Juni",
+  'Juli',
+  'Agustus',
+  'September',
+  'Oktober',
+  'November',
+  'Desember',
+];

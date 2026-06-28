@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
@@ -18,7 +16,7 @@ class OldpendinglistPage extends StatefulWidget {
 
 class _OldpendinglistPageState extends State<OldpendinglistPage> {
   // jendela konfirmasi hapus
-  void deleteData(TransaksiModel data) async {
+  void deleteData(TransaksiProvider prov, TransaksiModel data) async {
     bool? result = await showDialog(
       context: context,
       builder: (ctx) {
@@ -32,7 +30,7 @@ class _OldpendinglistPageState extends State<OldpendinglistPage> {
                   text: data.id.toString().padLeft(6, '0'),
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
-                TextSpan(text: " yang tertunda senilai "),
+                TextSpan(text: " senilai "),
                 TextSpan(
                   text: PublicWidget.toRupiah.format(data.total),
                   style: TextStyle(fontWeight: FontWeight.w700),
@@ -60,8 +58,7 @@ class _OldpendinglistPageState extends State<OldpendinglistPage> {
       },
     );
     if (result != null && result) {
-      log("Hapus");
-      // TODO: Lengkapi ini
+      prov.deleteCart(data);
     }
   }
 
@@ -77,6 +74,7 @@ class _OldpendinglistPageState extends State<OldpendinglistPage> {
               children: prov.daftarPendingTrx.map((data) {
                 return Container(
                   padding: EdgeInsets.fromLTRB(12, 12, 12, 4),
+                  margin: EdgeInsets.symmetric(vertical: 4),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black38, width: 0.3),
                     borderRadius: BorderRadius.circular(8),
@@ -153,7 +151,7 @@ class _OldpendinglistPageState extends State<OldpendinglistPage> {
                           IconButton(
                             tooltip: "Hapus",
                             onPressed: () {
-                              deleteData(data);
+                              deleteData(prov, data);
                             },
                             icon: Icon(
                               Icons.delete_forever_outlined,

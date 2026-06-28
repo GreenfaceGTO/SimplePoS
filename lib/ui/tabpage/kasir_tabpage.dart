@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
+import 'package:simplepos/models/data/transaksi_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/ui/transaksi/trxsatuanbottomsheet.dart';
@@ -46,7 +47,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
         );
       }
     } else {
-      trxProv.addNewDetailToCart(newDetail);
+      trxProv.addNewDetailToCart(trxProv.currentTransaksi!, newDetail);
     }
   }
 
@@ -241,7 +242,6 @@ class _KasirTabpageState extends State<KasirTabpage> {
                 item: item,
               );
               if (result != null) {
-                // log("$runtimeType : ${result.toMap().toString()}");
                 newItemAdded(result);
               }
             },

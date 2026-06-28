@@ -53,9 +53,11 @@ class _MenudrawerState extends State<Menudrawer> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final dataUsaha = context.read<MasterProvider>().dataUsaha;
       if (dataUsaha != null) {
-        String pathFile = dataUsaha.logoToko!;
-        isLogoFileExist = await File(pathFile).exists();
-        setState(() {});
+        if (dataUsaha.logoToko != null) {
+          String pathFile = dataUsaha.logoToko!;
+          isLogoFileExist = await File(pathFile).exists();
+          setState(() {});
+        }
       }
     });
     super.initState();

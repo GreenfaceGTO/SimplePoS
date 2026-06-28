@@ -82,22 +82,24 @@ class _MainframePageState extends State<MainframePage> {
               if (prov.currentPage == 1)
                 Consumer<TransaksiProvider>(
                   builder: (context, trxProv, _) {
-                    return Badge(
-                      alignment: Alignment.topRight,
-                      offset: Offset(-8, 10),
-                      label: trxProv.currentTransaksi == null
-                          ? null
-                          : Text(
-                              trxProv.currentTransaksi!.lstDetail.length
-                                  .toString(),
+                    return trxProv.currentTransaksi == null
+                        ? SizedBox()
+                        : Badge(
+                            alignment: Alignment.topRight,
+                            offset: Offset(-8, 10),
+                            label: trxProv.currentTransaksi == null
+                                ? null
+                                : Text(
+                                    trxProv.currentTransaksi!.lstDetail.length
+                                        .toString(),
+                                  ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, rtCartPage);
+                              },
+                              icon: Icon(Icons.shopping_cart, size: 18),
                             ),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, rtCartPage);
-                        },
-                        icon: Icon(Icons.shopping_cart, size: 18),
-                      ),
-                    );
+                          );
                   },
                 ),
 

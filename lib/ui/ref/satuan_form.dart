@@ -286,6 +286,9 @@ class _SatuanFormState extends State<SatuanForm> {
                                 child: tipe == "D"
                                     ? TextFormField(
                                         controller: txtStok,
+                                        enabled:
+                                            widget.args.formMode ==
+                                            FormMode.input,
                                         keyboardType: TextInputType.number,
                                         textInputAction: TextInputAction.next,
                                         onChanged: (val) {
@@ -410,7 +413,7 @@ class _SatuanFormState extends State<SatuanForm> {
       ),
       minActionBarHeight: 40,
       content: Text(
-        "Nama satuan dasar bersifat permanen.\nTidak dapat diubah lagi setelah disimpan.",
+        "Nama satuan dasar dan stok awal tidak dapat diubah lagi setelah data disimpan.",
       ),
 
       actions: [

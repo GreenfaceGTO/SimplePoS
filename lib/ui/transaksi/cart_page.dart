@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
+import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
@@ -16,8 +17,11 @@ class CartPage extends StatefulWidget {
 }
 
 class _CartPageState extends State<CartPage> {
+  late MasterProvider _mstProv;
   @override
   void initState() {
+    _mstProv = Provider.of<MasterProvider>(context, listen: false);
+
     super.initState();
   }
 
@@ -150,12 +154,12 @@ class _CartPageState extends State<CartPage> {
 
     if (confirm) {
       if (delTransaksi) {
-        await trxProv.deleteCart();
+        await trxProv.deleteCart(trxProv.currentTransaksi!);
         if (context.mounted) {
           Navigator.pop(context);
         }
       } else {
-        await trxProv.delCartDetail(data);
+        await trxProv.delCartDetail(trxProv.currentTransaksi!, data);
       }
     }
     // }
@@ -188,81 +192,129 @@ class _CartPageState extends State<CartPage> {
     return result;
   }
 
-  Container _itemCard(
+  bool bisaTambah(ItemtransaksiModel data) {
+    int idx = _mstProv.daftarProduk.indexWhere((e) => e.id == data.idProduk);
+    final item = _mstProv.daftarProduk[idx];
+
+    return item.stok! > data.isi!;
+  }
+
+  bool bisaKurang(ItemtransaksiModel data) {
+    int idx = _mstProv.daftarProduk.indexWhere((e) => e.id == data.idProduk);
+    final item = _mstProv.daftarProduk[idx];
+
+    return item.stok! - data.isi! > 0;
+  }
+
+  Widget _itemCard(
     ItemtransaksiModel dtl,
     TransaksiProvider trxProv,
     BuildContext context,
   ) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.blueGrey.shade300, width: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade200,
-            offset: Offset(3, 3),
-            blurRadius: 3,
-            spreadRadius: 3,
-          ),
-        ],
-      ),
+    return InkWell(
+      onTap: () {
+        log(dtl.toMap().toString());
+      },
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.blueGrey.shade300, width: 0.3),
+          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.shade200,
+              offset: Offset(3, 3),
+              blurRadius: 3,
+              spreadRadius: 3,
+            ),
+          ],
+        ),
 
-      padding: EdgeInsets.all(8),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  dtl.namaProduk!,
-                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+        padding: EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    dtl.namaProduk!,
+                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
+                  ),
                 ),
-              ),
-              IconButton(
-                onPressed: () {
-                  deleteItem(context, trxProv, dtl);
-                },
-                icon: Icon(
-                  Icons.delete_forever_outlined,
-                  size: 18,
-                  color: Colors.red,
+                IconButton(
+                  onPressed: () {
+                    deleteItem(context, trxProv, dtl);
+                  },
+                  icon: Icon(
+                    Icons.delete_forever_outlined,
+                    size: 18,
+                    color: Colors.red,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 4),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(dtl.namaSatuan!),
-              SizedBox(
-                width: 100,
-                child: QuantityStepper(
-                  value: dtl.qty!,
-                  tambah: () {},
-                  kurang: () {},
+              ],
+            ),
+            SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(dtl.namaSatuan!),
+                SizedBox(
+                  width: 100,
+                  child: QuantityStepper(
+                    value: dtl.qty!,
+                    tambah: bisaTambah(dtl)
+                        ? () async {
+                            final qty = dtl.isi!;
+                            log("$runtimeType : cart tambah $qty");
+                            // if (await _mstProv.updateDbStok(
+                            //   idProduk: dtl.idProduk!,
+                            //   value: -qty.abs(),
+                            // )) {
+                            //   trxProv.updateDetailQty(
+                            //     trx: trxProv.currentTransaksi!,
+                            //     detail: dtl,
+                            //     newValue: qty,
+                            //   );
+                            // }
+                          }
+                        : null,
+                    kurang: bisaKurang(dtl)
+                        ? () async {
+                            final qty = dtl.isi!;
+                            // if (await _mstProv.updateDbStok(
+                            //   idProduk: dtl.idProduk!,
+                            //   value: qty,
+                            // )) {
+                            //   trxProv.updateDetailQty(
+                            //     trx: trxProv.currentTransaksi!,
+                            //     detail: dtl,
+                            //     newValue: -qty.abs(),
+                            //   );
+                            // }
+                          }
+                        : null,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Divider(thickness: 0.8, color: Colors.black),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("${PublicWidget.toRupiah.format(dtl.harga)} x ${dtl.qty}"),
-              Text(
-                PublicWidget.toRupiah.format(dtl.qty! * dtl.harga!),
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 14,
+              ],
+            ),
+            Divider(thickness: 0.8, color: Colors.black),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("${PublicWidget.toRupiah.format(dtl.harga)} x ${dtl.qty}"),
+                Text(
+                  PublicWidget.toRupiah.format(dtl.qty! * dtl.harga!),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

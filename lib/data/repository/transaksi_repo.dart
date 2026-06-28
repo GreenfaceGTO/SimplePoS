@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:simplepos/data/database/dao/transaksi_dao.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
@@ -5,12 +7,34 @@ import 'package:simplepos/models/data/transaksi_model.dart';
 class TransaksiRepo {
   final TransaksiDao _transaksiDao = TransaksiDao();
 
+  // -----------------------------
+  // Update qty detail transaksi
+  // -----------------------------
+  Future<bool> updateTrxQty(
+    TransaksiModel transaksi,
+    ItemtransaksiModel detail,
+    int newValue,
+  ) async {
+    try {
+      return await _transaksiDao.updateTrxQty(
+        transaksi: transaksi,
+        detail: detail,
+        newValue: newValue,
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // ---------------------------------
   // Menghapus detail transaksi
   // ---------------------------------
-  Future<bool> delCartDetail(ItemtransaksiModel detail) async {
+  Future<bool> delCartDetail(
+    TransaksiModel transaksi,
+    ItemtransaksiModel detail,
+  ) async {
     try {
-      return await _transaksiDao.removeCartDetail(detail);
+      return await _transaksiDao.removeCartDetail(transaksi, detail);
     } catch (e) {
       throw Exception(e.toString());
     }
@@ -20,11 +44,16 @@ class TransaksiRepo {
   // Menambahkah detail transaksi
   // ---------------------------------
   Future<ItemtransaksiModel> addItemToCart(
+    TransaksiModel transaksi,
     ItemtransaksiModel newDetail,
     double currentTotal,
   ) async {
     try {
-      return await _transaksiDao.addItemToCart(newDetail, currentTotal);
+      return await _transaksiDao.addItemToCart(
+        transaksi,
+        newDetail,
+        currentTotal,
+      );
     } catch (e) {
       rethrow;
     }
@@ -35,6 +64,7 @@ class TransaksiRepo {
     try {
       return await _transaksiDao.deleteTransaksi(data);
     } catch (e) {
+      log("$runtimeType: ${e.toString()}");
       throw Exception(e.toString());
     }
   }

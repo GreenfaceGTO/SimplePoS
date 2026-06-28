@@ -3,13 +3,18 @@ import 'dart:developer';
 import 'package:simplepos/data/database/dbmanager.dart';
 import 'package:simplepos/data/database/table_scheme.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
+import 'package:simplepos/models/data/mutasistok_model.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
+import 'package:sqflite/sqflite.dart';
 
 class TransaksiDao {
   // ----------------------------------
   // Menghapus item dalam transaksi
   // ----------------------------------
-  Future<bool> removeCartDetail(ItemtransaksiModel detail) async {
+  Future<bool> removeCartDetail(
+    TransaksiModel transaksi,
+    ItemtransaksiModel detail,
+  ) async {
     final db = await Dbmanager.database;
     try {
       return await db.transaction((txn) async {
@@ -17,10 +22,7 @@ class TransaksiDao {
         final subTotal = detail.qty! * detail.harga!;
 
         // pulihkan stok
-        await txn.execute(
-          """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
-          [qty, detail.idProduk],
-        );
+        await updateStok(txn, idProduk: detail.idProduk!, newValue: qty!);
 
         // hapus detail
         await txn.delete(
@@ -30,7 +32,6 @@ class TransaksiDao {
         );
 
         //  update total di header
-
         await txn.execute(
           """UPDATE ${TableScheme.tbTranshd} SET total=total-? WHERE id=?""",
           [subTotal, detail.idTransaksi],
@@ -47,14 +48,32 @@ class TransaksiDao {
   // Merubah jumlah item di detail transaksi
   // ------------------------------------------
   Future<bool> updateTrxQty({
-    required ItemtransaksiModel data,
+    required TransaksiModel transaksi,
+    required ItemtransaksiModel detail,
     required int newValue,
   }) async {
     final db = await Dbmanager.database;
     try {
       return await db.transaction((txn) async {
-        // TODO: inibelum lengkap
-        return false;
+        // update stok
+        await txn.execute(
+          """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
+          [newValue, detail.idProduk],
+        );
+
+        // update detail transaksi
+        await txn.execute(
+          """UPDATE ${TableScheme.tbTransdt} SET qty = qty + ? WHERE id=? AND id_header=?""",
+          [newValue, detail.id, detail.idTransaksi],
+        );
+
+        // update total transaksi
+        await txn.execute(
+          """UPDATE ${TableScheme.tbTranshd} SET total=total+? WHERE id=?""",
+          [],
+        );
+
+        return true;
       });
     } catch (e) {
       throw Exception(e.toString());
@@ -65,7 +84,7 @@ class TransaksiDao {
   // Menambahkan detail transaksi ke transaksi dengan status draft
   // ---------------------------------------------------------------------
   Future<ItemtransaksiModel> addItemToCart(
-    // int idheader,
+    TransaksiModel transaksi,
     ItemtransaksiModel newDetail,
     double currentTotal,
   ) async {
@@ -148,15 +167,31 @@ class TransaksiDao {
         for (var dtl in trxData.lstDetail) {
           dtl.idTransaksi = idTrx;
 
+          log(
+            "$runtimeType: insert item ${dtl.namaProduk} pada detail transaksi sejumlah ${dtl.qty}",
+          );
           final detailId = await txn.insert(TableScheme.tbTransdt, dtl.toMap());
           dtl.id = detailId;
-          final qty = dtl.qty! * dtl.isi!;
 
+          final qty = dtl.qty! * dtl.isi!;
+          log("$runtimeType : update stok ${dtl.namaProduk} ${-qty.abs()}");
           // potong stok item
-          await txn.execute(
-            '''UPDATE ${TableScheme.tbItem} SET stok = stok - ? WHERE id=?''',
-            [qty, dtl.idProduk],
+          await updateStok(txn, idProduk: dtl.idProduk!, newValue: -qty.abs());
+
+          // catat mutasi stok sebagai keluar
+          final nilai = (dtl.qty! * dtl.isi!) * dtl.harga!;
+          final mutasi = MutasistokModel(
+            tanggal: DateTime.now().toIso8601String(),
+            pos: "K",
+            qty: -dtl.qty!.abs(),
+            nilai: nilai,
           );
+
+          log(
+            "$runtimeType: Mencatat mutasi keluar item ${dtl.namaProduk} pada tabel mutasi stok",
+          );
+
+          await updateMutasi(txn, mutasi);
         }
 
         return trxData;
@@ -172,13 +207,15 @@ class TransaksiDao {
   Future<bool> deleteTransaksi(TransaksiModel data) async {
     final db = await Dbmanager.database;
 
-    log(db.path);
-
     try {
+      log(data.toMap().toString());
       return await db.transaction((txn) async {
         // looping untuk memulihkan stok
         for (var detail in data.lstDetail) {
           final qty = detail.qty! * detail.isi!;
+          log(
+            "$runtimeType: hapus transaksi No ${detail.idTransaksi} & update stok ${detail.namaProduk} sejumlah $qty",
+          );
           await txn.execute(
             '''UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?''',
             [qty, detail.idProduk],
@@ -201,6 +238,7 @@ class TransaksiDao {
             0;
       });
     } catch (e) {
+      log("$runtimeType: ${e.toString()}");
       throw Exception(e.toString());
     }
   }
@@ -261,6 +299,60 @@ class TransaksiDao {
           .map((e) => ItemtransaksiModel.fromMap(e))
           .toList();
       return result;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // -----------------------------------------------------------------------
+  // Mengupdate stok produk ketika ada perubahan qty pada detail transaksi
+  // -----------------------------------------------------------------------
+  Future<int> updateStok(
+    Transaction txn, {
+    required int idProduk,
+    required int newValue,
+  }) async {
+    try {
+      return await txn.update(
+        TableScheme.tbItem,
+        {"stok": newValue},
+        where: "id=?",
+        whereArgs: [idProduk],
+      );
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // -------------------------------------------------------------
+  // mengupdate total transaksi ketika ada perubahan didetail
+  // -------------------------------------------------------------
+  Future<void> updateTotalTransaksi(TransaksiModel data) async {
+    double total = 0;
+    for (var detail in data.lstDetail) {
+      double subTotal = (detail.qty! * detail.isi!) * detail.harga!;
+      total = total + subTotal;
+    }
+    final db = await Dbmanager.database;
+
+    try {
+      await db.transaction((txn) async {
+        await txn.execute(
+          """UPDATE ${TableScheme.tbTranshd} SET total=? WHERE id=?""",
+          [total, data.id],
+        );
+      });
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // -------------------------
+  // Mencatat mutasi stok
+  // -------------------------
+  Future<void> updateMutasi(Transaction txn, MutasistokModel mutasi) async {
+    try {
+      await txn.insert(TableScheme.tbMutasiStok, mutasi.toMap());
     } catch (e) {
       throw Exception(e.toString());
     }

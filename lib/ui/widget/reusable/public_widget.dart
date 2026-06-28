@@ -5,11 +5,127 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 import 'package:simplepos/main.dart';
+import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
 import 'package:simplepos/services/utils/inputformater.dart';
 
 class PublicWidget {
-  // ====== Meampilkan jendela konfirmasi ketika user ingin menutup halaman tapi data yang sedang di edit belum disimpan ========
+  // ------------------------
+  // Custom periode picker
+  // ------------------------
+  static Future<DateTime?> customPeriodPicker(
+    BuildContext context, {
+    required DateTime initial,
+  }) async {
+    int selectedMonth = initial.month;
+    int selectedYear = initial.year;
+    return showDialog<DateTime>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Pilih Periode"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Text("Tahun:"),
+                      SizedBox(width: 8),
+                      SizedBox(
+                        width: 100,
+                        child: DropdownButton<int>(
+                          isExpanded: true,
+                          isDense: true,
+                          value: selectedYear,
+                          items: List.generate(10, (i) => selectedYear - 5 + i)
+                              .map(
+                                (year) => DropdownMenuItem(
+                                  value: year,
+                                  child: Text(
+                                    "$year",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                selectedYear = val;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 4,
+                    crossAxisSpacing: 4,
+                    childAspectRatio: 9 / 3,
+                    children: List.generate(12, (index) {
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            selectedMonth = index + 1;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: selectedMonth == index + 1
+                                ? Theme.of(context).colorScheme.secondary
+                                : null,
+                            border: Border.all(
+                              color: Colors.black38,
+                              width: 0.3,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              lstNamaBulan[index],
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: selectedMonth == index + 1
+                                    ? Colors.white
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      DateTime(selectedYear, selectedMonth),
+                    );
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Meampilkan jendela konfirmasi ketika user ingin menutup halaman tapi data
+  // yang sedang di edit belum disimpan
+  // ---------------------------------------------------------------------------
   static Future<bool> discardChange(BuildContext context) async {
     return await showDialog(
           context: context,
@@ -35,14 +151,18 @@ class PublicWidget {
         false;
   }
 
-  // ====== Widget Logo Aplikasi ======
+  // -------------------------
+  // Widget Logo Aplikasi
+  // -------------------------
   static Widget appLogo({double size = 120}) => SizedBox(
     width: size,
     height: size * 0.5,
     child: Image.asset("assets/mbspos.png", fit: BoxFit.cover),
   );
 
-  // ====== Widget bottomsheet opsi sumber pengambilan gambar ======
+  // ---------------------------------------------------
+  // Widget bottomsheet opsi sumber pengambilan gambar
+  // ---------------------------------------------------
   static Future<ImageSource?> showImageSourceOption(
     BuildContext context,
   ) async {
@@ -81,7 +201,9 @@ class PublicWidget {
     );
   }
 
-  // ======== Mengambil gambar dari kamera atau gallery ===========
+  // --------------------------------------------
+  // Mengambil gambar dari kamera atau gallery
+  // --------------------------------------------
   static Future<File?> pickImage({
     ImageSource source = ImageSource.gallery,
   }) async {
@@ -99,7 +221,9 @@ class PublicWidget {
     return null;
   }
 
-  // ====== Widget penampil pesan toast (snackbar) ==========
+  // -----------------------------------------
+  // Widget penampil pesan toast (snackbar)
+  // -----------------------------------------
   static void showMessage({
     required String message,
     MessageMode mode = MessageMode.info,
@@ -133,14 +257,18 @@ class PublicWidget {
     );
   }
 
-  // =========Metode konversi angka ke rupiah=========
+  // ----------------------------------
+  // Metode konversi angka ke rupiah
+  // ----------------------------------
   static NumberFormat toRupiah = NumberFormat.currency(
     locale: 'ID',
     symbol: "Rp. ",
     decimalDigits: 2,
   );
 
-  // ====== Jendela dialog input referensi kategori & satuan
+  // --------------------------------------------------
+  // Jendela dialog input referensi kategori & satuan
+  // --------------------------------------------------
   static Future<String?> showRefForm(
     BuildContext context, {
     required String title,
@@ -174,7 +302,9 @@ class PublicWidget {
     );
   }
 
-  // ============Metode scan barcode============
+  // -----------------------
+  // Metode scan barcode
+  // -----------------------
   static Future<String?> scanBarcode(BuildContext context) async {
     String? result = await SimpleBarcodeScanner.scanBarcode(
       context,

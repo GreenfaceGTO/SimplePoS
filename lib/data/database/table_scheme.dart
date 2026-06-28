@@ -74,14 +74,16 @@ class TableScheme {
 ''';
 
   static const createTbMutasiStok = '''CREATE TABLE $tbMutasiStok (
-    id        INTEGER,
-    tanggal   TEXT,
-    pos_tipe  TEXT    CHECK (pos_tipe IN ('IN', 'OUT') ) 
-                      DEFAULT OUT,
-    id_item   INTEGER REFERENCES tb_item (id) ON DELETE CASCADE,
-    id_satuan INTEGER REFERENCES tb_itemsat (id) ON DELETE CASCADE,
-    qty       INTEGER,
-    nilai     REAL
+    id           INTEGER,
+    tanggal      TEXT,
+    keterangan   TEXT,
+    pos_tipe     TEXT    CHECK (pos_tipe IN ('IN', 'OUT') ) 
+                         DEFAULT OUT,
+    id_transaksi INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE,
+    id_item      INTEGER REFERENCES tb_item (id) ON DELETE CASCADE,
+    id_satuan    INTEGER REFERENCES tb_itemsat (id) ON DELETE CASCADE,
+    qty          INTEGER,
+    nilai        REAL
 );
 ''';
 

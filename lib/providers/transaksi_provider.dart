@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:simplepos/data/repository/transaksi_repo.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
@@ -27,11 +28,51 @@ class TransaksiProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
+  // --------------------------------
+  // Mengupdate qty item detail
+  // --------------------------------
+  Future<void> updateTrxQty({
+    required TransaksiModel trx,
+    required ItemtransaksiModel detail,
+    required int newValue,
+  }) async {
+    // log("step 3 [$runtimeType]: tambah $newValue di detail transaksi");
+    // if (currentTransaksi!.id == trx.id) {
+    //   int idx = _currentTransaksi!.lstDetail.indexWhere(
+    //     (e) => e.id == detail.id,
+    //   );
+    //   detail.qty = detail.qty! + newValue;
+
+    //   _currentTransaksi!.lstDetail[idx] = detail;
+    //   // log("Qty sebelum ubah ${item.qty}");
+    //   // log("akan ditambahkan $newValue");
+    //   // item.qty = item.qty! + newValue;
+    //   // log("Qty setelah ubah ${item.qty}");
+    //   // log(
+    //   //   "step 3 a : [$runtimeType] qty di currentTransaksi diupdate sejumlah ${item.qty}",
+    //   // );
+    //   // log("selengkapnya ${item.toMap()}");
+    // }
+
+    // // jika transaksi ada di daftar transaksi, ubah juga
+    // if (daftarTrxHariIni.any((e) => e.id == trx.id)) {
+    //   int idxh = daftarTrxHariIni.indexWhere((e) => e.id == trx.id);
+    //   final dtTrx = daftarTrxHariIni[idxh];
+    //   int idxd = dtTrx.lstDetail.indexWhere((e) => e.id == detail.id);
+    //   final item = dtTrx.lstDetail[idxd];
+    //   item.qty = item.qty! + newValue;
+    // }
+    // notifyListeners();
+  }
+
   // -------------------------------
   // Menghapus detail transaksi
   // -------------------------------
-  Future<void> delCartDetail(ItemtransaksiModel detail) async {
-    final result = await _transaksiRepo.delCartDetail(detail);
+  Future<void> delCartDetail(
+    TransaksiModel transaksi,
+    ItemtransaksiModel detail,
+  ) async {
+    final result = await _transaksiRepo.delCartDetail(transaksi, detail);
 
     if (!result) {
       return;
@@ -44,49 +85,58 @@ class TransaksiProvider with ChangeNotifier {
     _currentTransaksi!.total = _currentTransaksi!.total! - subTotal;
 
     // update stok di master provider
-    masterProvider.updateStok(detail.idProduk!, detail.qty!, tambah: true);
+    masterProvider.updateLocalStok(
+      detail.idProduk!,
+      detail.qty! * detail.isi!,
+      tambah: true,
+    );
     notifyListeners();
   }
 
   // -------------------------------------------
   /// Menambahkan item detail transaksi baru
   // -------------------------------------------
-  Future<void> addNewDetailToCart(ItemtransaksiModel data) async {
+  Future<void> addNewDetailToCart(
+    TransaksiModel transaksi,
+    ItemtransaksiModel detail,
+  ) async {
     try {
-      final newTotal = _currentTransaksi!.total! + (data.qty! * data.harga!);
-      data.idTransaksi = _currentTransaksi!.id!;
+      final newTotal = transaksi.total! + (detail.qty! * detail.harga!);
+      detail.idTransaksi = transaksi.id!;
       // log("$runtimeType: ${data.toMap()}");
       final result = await _transaksiRepo.addItemToCart(
-        data,
-        currentTransaksi!.total!,
+        transaksi,
+        detail,
+        transaksi.total!,
       );
 
       // pastikan data sudah memiliki id
-      data.id ??= result.id;
+      detail.id ??= result.id;
 
       // periksa jika item yang akan ditambahkan sudah ada di daftar detail transaksi
-      bool ada = _currentTransaksi!.lstDetail.any(
-        (e) => e.idProduk == data.idProduk,
-      );
+      bool ada = transaksi.lstDetail.any((e) => e.idProduk == detail.idProduk);
 
       if (ada) {
         // item sudah ada, update jumlahnya
-        final idxDetail = _currentTransaksi!.lstDetail.indexWhere(
-          (e) => e.idProduk == data.idProduk,
+        final idxDetail = transaksi.lstDetail.indexWhere(
+          (e) => e.idProduk == detail.idProduk,
         );
-        final oldQty = _currentTransaksi!.lstDetail[idxDetail].qty;
-        final newQty = data.qty! + oldQty!;
-        _currentTransaksi!.lstDetail[idxDetail].qty = newQty;
+        final oldQty = transaksi.lstDetail[idxDetail].qty;
+        final newQty = detail.qty! + oldQty!;
+        transaksi.lstDetail[idxDetail].qty = newQty;
       } else {
         // item belum ada, tambahkan
-        _currentTransaksi!.lstDetail.add(result);
+        transaksi.lstDetail.add(result);
       }
 
       // update total transaksi
       _currentTransaksi!.total = newTotal;
 
       // updateStok
-      masterProvider.updateStok(data.idProduk!, data.qty!);
+      masterProvider.updateLocalStok(
+        detail.idProduk!,
+        detail.qty! * detail.isi!,
+      );
       notifyListeners();
     } catch (e) {
       log(e.toString());
@@ -97,24 +147,35 @@ class TransaksiProvider with ChangeNotifier {
   // -------------------------------------------------------
   /// Menghapus transaksi dalam keranjang (status = draft)
   // -------------------------------------------------------
-  Future<void> deleteCart() async {
+  Future<void> deleteCart(TransaksiModel data) async {
     try {
-      final result = await _transaksiRepo.deleteCart(currentTransaksi!);
+      final result = await _transaksiRepo.deleteCart(data);
       if (result) {
         // update stok local
-        for (var detail in currentTransaksi!.lstDetail) {
-          masterProvider.updateStok(
+        for (var detail in data.lstDetail) {
+          masterProvider.updateLocalStok(
             detail.idProduk!,
             detail.qty! * detail.isi!,
             tambah: true,
           );
         }
 
-        _lstTodayTrx.removeWhere((e) => e.id == currentTransaksi!.id!);
-        _currentTransaksi = null;
+        // jika data yang dikirim adalah transaksi aktif saat ini
+        if (data.id == _currentTransaksi!.id) {
+          _lstTodayTrx.removeWhere((e) => e.id == currentTransaksi!.id!);
+          _currentTransaksi = null;
+        } else {
+          // periksa jika data yang dikirim adalah data pending
+          final inPending = _lstPendingTrx.any((e) => e.id == data.id);
+          if (inPending) {
+            _lstPendingTrx.removeWhere((e) => e.id == data.id);
+          } else {
+            log("$runtimeType: message");
+          }
+        }
         notifyListeners();
       } else {
-        log("gagal");
+        log("$runtimeType: ${result.toString()}");
       }
     } catch (e) {
       PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
@@ -143,7 +204,7 @@ class TransaksiProvider with ChangeNotifier {
         _currentTransaksi = trx;
         _lstTodayTrx.add(trx);
         for (var sat in _currentTransaksi!.lstDetail) {
-          masterProvider.updateStok(sat.idProduk!, sat.qty! * sat.isi!);
+          masterProvider.updateLocalStok(sat.idProduk!, sat.qty! * sat.isi!);
         }
         notifyListeners();
         return true;

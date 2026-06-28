@@ -321,6 +321,13 @@ class _KatalogProdukPageState extends State<KatalogProdukPage> {
               ),
             );
             break;
+          case "/mutasi":
+            Navigator.pushNamed(
+              context,
+              rtMutasiStok,
+              arguments: ArgsModel(formMode: FormMode.view, data: produk),
+            );
+            break;
           default:
         }
       },
