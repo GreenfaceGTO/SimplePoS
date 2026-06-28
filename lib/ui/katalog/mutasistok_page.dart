@@ -90,7 +90,6 @@ class _MutasistokPageState extends State<MutasistokPage> {
                           selectedMonth = lstNamaBulan[result.month - 1];
                           selectedYear = result.year.toString();
                         });
-                        log(lstNamaBulan.indexOf(selectedMonth!).toString());
                         fetchData(
                           int.parse(selectedYear!),
                           lstNamaBulan.indexOf(selectedMonth!) + 1,
@@ -122,7 +121,12 @@ class _MutasistokPageState extends State<MutasistokPage> {
           Expanded(
             child: SizedBox(
               // color: Colors.red,
+              width: double.infinity,
               child: DataTable(
+                border: TableBorder(
+                  verticalInside: BorderSide(color: Colors.black38, width: 0.3),
+                  top: BorderSide(color: Colors.black38, width: 1),
+                ),
                 headingRowColor: WidgetStatePropertyAll(Colors.cyan.shade100),
                 columnSpacing: 20,
                 horizontalMargin: 16,
@@ -134,8 +138,10 @@ class _MutasistokPageState extends State<MutasistokPage> {
                   DataColumn(label: Text("Sisa"), numeric: true),
                 ],
                 rows: lstMutasi.map((mts) {
-                  double sisa = 0;
-                  if (mts.pos == "IN") {
+                  int sisa = 0;
+                  if (lstMutasi.indexOf(mts) == 0) {
+                    sisa = mts.qty!;
+                  } else if (mts.pos == "IN") {
                     sisa = sisa + mts.qty!;
                   } else {
                     sisa = sisa - mts.qty!;
@@ -160,7 +166,12 @@ class _MutasistokPageState extends State<MutasistokPage> {
                             ? Text("-")
                             : Text(mts.qty.toString()),
                       ),
-                      DataCell(Text(sisa.toStringAsFixed(0))),
+                      DataCell(
+                        Text(
+                          sisa.toStringAsFixed(0),
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
                     ],
                   );
                 }).toList(),

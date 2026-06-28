@@ -39,6 +39,7 @@ class ProdukDao {
       if (result.isEmpty) {
         return 0;
       } else {
+        log(result.first['stok_awal'].toString());
         return (result.first['stok_awal'] as num).toInt();
       }
     } catch (e) {
@@ -175,6 +176,7 @@ class ProdukDao {
 
     try {
       return await db.transaction((txn) async {
+        log("$runtimeType: Menghapus satuan");
         // hapus detail
         await txn.delete(
           TableScheme.tbItemSat,
@@ -182,10 +184,19 @@ class ProdukDao {
           whereArgs: [data.id],
         );
 
+        log("$runtimeType: Menghapus header");
         // hapus header
         await txn.delete(
           TableScheme.tbItem,
           where: "id=?",
+          whereArgs: [data.id],
+        );
+
+        log("$runtimeType: Menghapus mutasi stok");
+        // hapus mutasi stok
+        await txn.delete(
+          TableScheme.tbMutasiStok,
+          where: "id_item=?",
           whereArgs: [data.id],
         );
         return true;
@@ -217,7 +228,7 @@ class ProdukDao {
         final today = DateTime.now().toIso8601String();
         final mutasi = MutasistokModel(
           tanggal: today,
-          keterangan: "Inisialisasi stok awal",
+          keterangan: "Inisialisasi produk dan stok awal",
           pos: "IN",
           idProduk: data.id,
           idSatuan: data.lstSatuan![0].id,

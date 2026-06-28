@@ -51,18 +51,17 @@ class MasterProvider with ChangeNotifier {
       );
 
       List<MutasistokModel> lstMutasi = [];
-      if (saldoAwal > 0) {
-        final periode = DateTime(tahun, bulan, 1);
-        final tglSebelumnya = periode.subtract(Duration(days: 1));
-        final mtsSaldo = MutasistokModel(
-          tanggal: tglSebelumnya.toIso8601String(),
-          keterangan: "SALDO AWAL",
-          idProduk: idProduk,
-          qty: saldoAwal,
-        );
+      // if (saldoAwal > 0) {}
+      final periode = DateTime(tahun, bulan, 1);
+      final tglSebelumnya = periode.subtract(Duration(days: 1));
+      final mtsSaldo = MutasistokModel(
+        tanggal: tglSebelumnya.toIso8601String(),
+        keterangan: "SALDO AKHIR",
+        idProduk: idProduk,
+        qty: saldoAwal,
+      );
 
-        lstMutasi.add(mtsSaldo);
-      }
+      lstMutasi.add(mtsSaldo);
 
       log("$runtimeType: fetch mutasi stok");
 

@@ -39,12 +39,16 @@ class UsahaDao {
     final db = await Dbmanager.database;
     try {
       return await db.transaction((txn) async {
+        dev.log("$runtimeType: Membuat kode usaha");
         data.kodeusaha = generateKodeUsaha();
         final tglRegister = DateTime.now().toIso8601String();
         data.tglRegister = tglRegister;
+
+        dev.log("$runtimeType: Menyimpan data usaha");
         // insert data usaha
         await txn.insert(TableScheme.tbUsaha, data.toMap());
 
+        dev.log("$runtimeType: Menyimpan saldo bonus pendaftaran");
         // insert saldo bonus pendaftaran
         final saldoAwal = SaldoModel(
           tanggal: tglRegister,
