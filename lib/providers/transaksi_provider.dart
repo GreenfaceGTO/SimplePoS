@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:simplepos/data/repository/transaksi_repo.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/transaksi_model.dart';
@@ -183,15 +182,15 @@ class TransaksiProvider with ChangeNotifier {
   }
 
   // ----------------------------------------------------------------------------------------------------
-  /// Menambahkan transaksi baru, metode ini dipanggil hanya saat user menambahkan item pertama ke dalam keranjang. Untuk item selanjutnya menggunakan metode [addOtherItemToTrx]
+  /// Menambahkan transaksi baru, metode ini dipanggil hanya saat user menambahkan item pertama ke dalam keranjang. Untuk item selanjutnya menggunakan metode [addNewDetailToCart]
   // ----------------------------------------------------------------------------------------------------
   Future<bool> addNewTransaksi(ItemtransaksiModel firstItem) async {
-    var firstTotal = firstItem.harga! * (firstItem.isi! * firstItem.qty!);
+    var total = firstItem.harga! * (firstItem.isi! * firstItem.qty!);
 
     final newTrx = TransaksiModel(
       tipe: 'jual',
       tanggal: DateTime.now().toIso8601String(),
-      total: firstTotal,
+      total: total,
       status: "draft",
       lstDetail: [firstItem],
     );

@@ -1,0 +1,9 @@
+METODE ADD TO CART
+1. item pertama
+
+- tambahkan transaksi, ambil idnya
+- tambahkan 1 detail, ambil idnya
+- update (-) stok item sejumlah qty*isi dari object detail
+- tambahkan riwayat mutasi stok
+
+

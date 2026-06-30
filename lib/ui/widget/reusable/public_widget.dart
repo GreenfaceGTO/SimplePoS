@@ -105,14 +105,17 @@ class PublicWidget {
                 ],
               ),
               actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(
-                      context,
-                      DateTime(selectedYear, selectedMonth),
-                    );
-                  },
-                  child: Text("OK"),
+                SizedBox(
+                  height: 45,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                        DateTime(selectedYear, selectedMonth),
+                      );
+                    },
+                    child: Text("OK"),
+                  ),
                 ),
               ],
             );

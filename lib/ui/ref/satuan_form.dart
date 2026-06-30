@@ -64,6 +64,7 @@ class _SatuanFormState extends State<SatuanForm> {
       satDasar = data['satuan_dasar'];
       txtHpokok.text = data['satuan_dasar'].hPokok.toStringAsFixed(0);
     } else {
+      txtStok.text = '0';
       txtIsi.text = "1";
       showSatDasarInfo = widget.getShowHideSatDasarInfo();
     }
@@ -250,8 +251,13 @@ class _SatuanFormState extends State<SatuanForm> {
                                   textInputAction: TextInputAction.next,
                                   keyboardType: TextInputType.number,
                                   onChanged: (val) {
-                                    hitungHarga(dari: "isi");
-                                    _updateField("isi", value: int.parse(val));
+                                    if (val.isNotEmpty) {
+                                      hitungHarga(dari: "isi");
+                                      _updateField(
+                                        "isi",
+                                        value: int.parse(val),
+                                      );
+                                    }
                                   },
                                   decoration: InputDecoration(
                                     label: Text("Isi"),

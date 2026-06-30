@@ -8,8 +8,8 @@ import 'package:simplepos/models/data/mutasistok_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/models/data/saldo_model.dart';
 import 'package:simplepos/models/data/usaha_model.dart';
+import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/services/utils/enums.dart';
-import 'package:simplepos/services/utils/extension.dart';
 import 'package:simplepos/ui/widget/reusable/public_widget.dart';
 
 class MasterProvider with ChangeNotifier {
@@ -54,9 +54,12 @@ class MasterProvider with ChangeNotifier {
       // if (saldoAwal > 0) {}
       final periode = DateTime(tahun, bulan, 1);
       final tglSebelumnya = periode.subtract(Duration(days: 1));
+      final namaBulanLalu = lstNamaBulan[tglSebelumnya.month - 1];
+      log("$runtimeType: $namaBulanLalu");
       final mtsSaldo = MutasistokModel(
         tanggal: tglSebelumnya.toIso8601String(),
-        keterangan: "SALDO AKHIR",
+        keterangan:
+            "SALDO AKHIR ${namaBulanLalu.toUpperCase()} ${tglSebelumnya.year}",
         idProduk: idProduk,
         qty: saldoAwal,
       );

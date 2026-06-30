@@ -23,6 +23,7 @@ class _MutasistokPageState extends State<MutasistokPage> {
   List<MutasistokModel> lstMutasi = [];
   String? selectedMonth;
   String? selectedYear;
+  int sisa = 0;
 
   @override
   void initState() {
@@ -138,13 +139,18 @@ class _MutasistokPageState extends State<MutasistokPage> {
                   DataColumn(label: Text("Sisa"), numeric: true),
                 ],
                 rows: lstMutasi.map((mts) {
-                  int sisa = 0;
+                  // int sisa = 0;
                   if (lstMutasi.indexOf(mts) == 0) {
+                    // jika index mutasi pada saldo akhir bulan sebelumnya
                     sisa = mts.qty!;
-                  } else if (mts.pos == "IN") {
-                    sisa = sisa + mts.qty!;
                   } else {
-                    sisa = sisa - mts.qty!;
+                    if (mts.pos == "IN") {
+                      sisa = sisa + mts.qty!;
+                      log("${mts.keterangan} sisa $sisa");
+                    } else {
+                      sisa = sisa - mts.qty!;
+                      log("${mts.keterangan} sisa $sisa");
+                    }
                   }
                   return DataRow(
                     cells: [

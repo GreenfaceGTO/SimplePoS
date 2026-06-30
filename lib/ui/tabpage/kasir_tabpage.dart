@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/models/data/itemtransaksi_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
-import 'package:simplepos/models/data/transaksi_model.dart';
 import 'package:simplepos/providers/master_provider.dart';
 import 'package:simplepos/providers/transaksi_provider.dart';
 import 'package:simplepos/ui/transaksi/trxsatuanbottomsheet.dart';
@@ -37,7 +36,6 @@ class _KasirTabpageState extends State<KasirTabpage> {
   }
 
   Future<void> newItemAdded(ItemtransaksiModel newDetail) async {
-    // final trxProv = Provider.of<TransaksiProvider>(context);
     log("$runtimeType : ${newDetail.toMap().toString()}");
     if (trxProv.currentTransaksi == null) {
       if (await trxProv.addNewTransaksi(newDetail)) {

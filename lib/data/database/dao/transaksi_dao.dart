@@ -90,7 +90,6 @@ class TransaksiDao {
   ) async {
     final db = await Dbmanager.database;
     try {
-      log("$runtimeType: ${newDetail.toMap()}");
       return await db.transaction((txn) async {
         // tambahkan total dimemori saat ini dengan total dari item baru
         currentTotal = currentTotal + (newDetail.qty! * newDetail.harga!);
@@ -133,10 +132,18 @@ class TransaksiDao {
         }
 
         // update stok
-        await txn.execute(
-          """UPDATE ${TableScheme.tbItem} SET stok=stok-? WHERE id=?""",
-          [qty, newDetail.id],
+        await updateStok(txn, idProduk: newDetail.idProduk!, newValue: qty);
+
+        // update mutasi
+        final mutasi = MutasistokModel(
+          tanggal: transaksi.tanggal,
+          idProduk: newDetail.idProduk,
+          idTransaksi: newDetail.idTransaksi,
+          pos: "OUT",
+          keterangan: "",
+          qty: qty,
         );
+        await updateMutasi(txn, mutasi);
 
         // update total di header transaksi
         await txn.execute(
@@ -160,6 +167,7 @@ class TransaksiDao {
 
     try {
       return await db.transaction<TransaksiModel>((txn) async {
+        // Menyimpan header transaksi
         final idTrx = await txn.insert(TableScheme.tbTranshd, trxData.toDb());
         trxData.id = idTrx;
 
@@ -175,15 +183,20 @@ class TransaksiDao {
 
           final qty = dtl.qty! * dtl.isi!;
           log("$runtimeType : update stok ${dtl.namaProduk} ${-qty.abs()}");
+
           // potong stok item
           await updateStok(txn, idProduk: dtl.idProduk!, newValue: -qty.abs());
 
-          // catat mutasi stok sebagai keluar
+          // catat mutasi stok keluar
           final nilai = (dtl.qty! * dtl.isi!) * dtl.harga!;
           final mutasi = MutasistokModel(
             tanggal: DateTime.now().toIso8601String(),
-            pos: "K",
-            qty: -dtl.qty!.abs(),
+            keterangan:
+                "Transaksi penjualan nomor ${trxData.id.toString().padLeft(6, '0')}",
+            pos: "OUT",
+            idTransaksi: trxData.id,
+            idProduk: dtl.idProduk,
+            qty: dtl.qty!.abs(),
             nilai: nilai,
           );
 
@@ -226,6 +239,12 @@ class TransaksiDao {
         await txn.delete(
           TableScheme.tbTransdt,
           where: "id_header=?",
+          whereArgs: [data.id],
+        );
+        // hapus mutasi stok
+        await txn.delete(
+          TableScheme.tbMutasiStok,
+          where: 'id_transaksi=?',
           whereArgs: [data.id],
         );
 
@@ -307,17 +326,16 @@ class TransaksiDao {
   // -----------------------------------------------------------------------
   // Mengupdate stok produk ketika ada perubahan qty pada detail transaksi
   // -----------------------------------------------------------------------
-  Future<int> updateStok(
+  Future<void> updateStok(
     Transaction txn, {
     required int idProduk,
     required int newValue,
   }) async {
     try {
-      return await txn.update(
-        TableScheme.tbItem,
-        {"stok": newValue},
-        where: "id=?",
-        whereArgs: [idProduk],
+      log("$runtimeType [updateStok] value $newValue");
+      await txn.execute(
+        """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
+        [newValue, idProduk],
       );
     } catch (e) {
       throw Exception(e.toString());
@@ -352,7 +370,25 @@ class TransaksiDao {
   // -------------------------
   Future<void> updateMutasi(Transaction txn, MutasistokModel mutasi) async {
     try {
-      await txn.insert(TableScheme.tbMutasiStok, mutasi.toMap());
+      // periksa jika mutasi sudah ada
+      final lstCurrent = await txn.query(
+        TableScheme.tbMutasiStok,
+        where: "id_item=? AND id_transaksi=?",
+        whereArgs: [mutasi.idProduk, mutasi.idTransaksi],
+      );
+
+      if (lstCurrent.isNotEmpty) {
+        // update data lama
+        log("$runtimeType: Update mutasi");
+        await txn.execute(
+          """UPDATE ${TableScheme.tbMutasiStok} SET qty=qty+? WHERE id_item=? AND id_transaksi=?""",
+          [mutasi.qty, mutasi.idProduk, mutasi.idTransaksi],
+        );
+      } else {
+        log("$runtimeType: Insert mutasi");
+        // buat data baru
+        await txn.insert(TableScheme.tbMutasiStok, mutasi.toMap());
+      }
     } catch (e) {
       throw Exception(e.toString());
     }

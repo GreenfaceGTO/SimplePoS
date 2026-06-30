@@ -28,9 +28,7 @@ class _KatalogFormState extends State<KatalogForm> {
   ProdukModel? data;
   ProdukModel? oldData;
   ProdukSatModel? satDasar;
-  List<ProdukSatModel> satLain = [];
 
-  // Widget spasi = PublicWidget.spasi();
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -45,7 +43,6 @@ class _KatalogFormState extends State<KatalogForm> {
       txtNama.text = data!.namaProduk!;
       satDasar = data!.getSatuanDasar();
       satDasar!.stok = data!.stok;
-      satLain = data!.lstSatuan!.skip(1).toList();
 
       setState(() {});
     } else {
@@ -125,7 +122,6 @@ class _KatalogFormState extends State<KatalogForm> {
           data!.lstSatuan!.removeWhere(
             (e) => e.satuan!.toLowerCase() == satuan.satuan!.toLowerCase(),
           );
-          satLain.removeWhere((e) => e.satuan == satuan.satuan);
         } else {
           data!.lstSatuan!.clear();
         }
@@ -146,17 +142,6 @@ class _KatalogFormState extends State<KatalogForm> {
         mode: MessageMode.warning,
       );
     } else if (formKey.currentState!.validate()) {
-      // // Menambahkan satuan dasar di awal daftar satuan sebelum satuan lainnya
-      // List<ProdukSatModel> sat = [satDasar!];
-
-      // // Looping variabel satLain lokal untuk di tambahkan di variabel sat, setelah satuan dasar
-      // for (var satkov in satLain) {
-      //   if (!sat.contains(satkov)) {
-      //     sat.add(satkov);
-      //   }
-      // }
-
-      // inisialisasi awal variabel selesai = gagal
       bool done = false;
 
       if (widget.args.formMode == FormMode.input) {
@@ -192,41 +177,47 @@ class _KatalogFormState extends State<KatalogForm> {
       case "nama":
         data!.namaProduk = txtNama.text;
 
-        break;
       case "tag":
         if (value != null) {
           data!.tag!.clear();
           data!.tag!.addAll(value);
         }
-        break;
       case "satuan":
         if (value != null) {
+          // hanya update jika value adalah object satuan
           if (value is ProdukSatModel) {
             if (value.tipe == 'D') {
               satDasar = value;
-              if (widget.args.formMode == FormMode.update) {
-                data!.lstSatuan![0] = value;
-              } else {
-                data!.lstSatuan!.add(value);
-              }
+              data!.stok = satDasar!.stok;
+            }
 
-              data!.stok = value.stok;
+            // periksa jika satuan sudah ada di daftar
+            bool exist = data!.lstSatuan!.any(
+              (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
+            );
+
+            if (!exist) {
+              // jika satuan belum ada, tambahkan
+              data!.lstSatuan!.add(value);
             } else {
-              if (satLain.any(
-                (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
-              )) {
+              // jika satuan belum ada, periksa mode form
+              if (widget.args.formMode == FormMode.input) {
+                // jika mode input, tampilkan pesan satuan sudah ada
                 PublicWidget.showMessage(
-                  message: "Satuan sudah ada!",
+                  message: "Satuan sudah ada",
                   mode: MessageMode.info,
                 );
               } else {
-                satLain.add(value);
-                data!.lstSatuan!.add(value);
+                // jika mode edit, cari posisi index data di dalam daftar untuk diubah
+                int idx = data!.lstSatuan!.indexWhere(
+                  (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
+                );
+
+                data!.lstSatuan![idx] = value;
               }
             }
           }
         }
-        break;
       default:
     }
     setState(() {});
@@ -344,7 +335,7 @@ class _KatalogFormState extends State<KatalogForm> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (satLain.isNotEmpty)
+                        if (data!.lstSatuan!.isNotEmpty)
                           ...data!.lstSatuan!.skip(1).map((e) {
                             return _satuanLainCard(tema, e);
                           }),
@@ -475,13 +466,14 @@ class _KatalogFormState extends State<KatalogForm> {
             ),
           );
           if (satuanLain != null) {
-            int idx = data!.lstSatuan!.indexWhere(
-              (e) => e.satuan == satuanLain.satuan,
-            );
-            data!.lstSatuan![idx] = satuanLain;
-            satLain.clear();
-            satLain.addAll(data!.lstSatuan!);
-            setState(() {});
+            updateField("satuan", value: satuanLain);
+            // int idx = data!.lstSatuan!.indexWhere(
+            //   (e) => e.satuan == satuanLain.satuan,
+            // );
+            // data!.lstSatuan![idx] = satuanLain;
+            // satLain.clear();
+            // satLain.addAll(data!.lstSatuan!);
+            // setState(() {});
           }
         } else {
           deleteSatuan(satuan);
@@ -617,8 +609,8 @@ class _KatalogFormState extends State<KatalogForm> {
           );
           log("$runtimeType : here");
           if (newSatDasar != null) {
-            updateField('satuan', value: newSatDasar);
-            // log(newSatDasar.toMap().toString());
+            log(newSatDasar.toMap().toString());
+            // updateField('satuan', value: newSatDasar);
             // setState(() {
             //   satDasar = newSatDasar;
             //   data!.lstSatuan![0] = newSatDasar;
@@ -638,18 +630,20 @@ class _KatalogFormState extends State<KatalogForm> {
             ),
           ),
           PopupMenuItem(
-            enabled: satLain.isEmpty,
+            enabled: data!.lstSatuan!.length == 1,
             value: "/hapus",
             child: ListTile(
               leading: Icon(
                 Icons.delete_forever,
                 size: 18,
-                color: satLain.isEmpty ? Colors.red : Colors.grey,
+                color: data!.lstSatuan!.length == 1 ? Colors.red : Colors.grey,
               ),
               title: Text(
                 "Hapus",
                 style: TextStyle(
-                  color: satLain.isEmpty ? Colors.red : Colors.grey,
+                  color: data!.lstSatuan!.length == 1
+                      ? Colors.red
+                      : Colors.grey,
                 ),
               ),
             ),
