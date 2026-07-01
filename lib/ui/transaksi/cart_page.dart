@@ -267,31 +267,21 @@ class _CartPageState extends State<CartPage> {
                         ? () async {
                             final qty = dtl.isi!;
                             log("$runtimeType : cart tambah $qty");
-                            // if (await _mstProv.updateDbStok(
-                            //   idProduk: dtl.idProduk!,
-                            //   value: -qty.abs(),
-                            // )) {
-                            //   trxProv.updateDetailQty(
-                            //     trx: trxProv.currentTransaksi!,
-                            //     detail: dtl,
-                            //     newValue: qty,
-                            //   );
-                            // }
+                            trxProv.updateTrxQty(
+                              transaksi: trxProv.currentTransaksi!,
+                              detail: dtl,
+                              newValue: qty,
+                            );
                           }
                         : null,
                     kurang: bisaKurang(dtl)
                         ? () async {
                             final qty = dtl.isi!;
-                            // if (await _mstProv.updateDbStok(
-                            //   idProduk: dtl.idProduk!,
-                            //   value: qty,
-                            // )) {
-                            //   trxProv.updateDetailQty(
-                            //     trx: trxProv.currentTransaksi!,
-                            //     detail: dtl,
-                            //     newValue: -qty.abs(),
-                            //   );
-                            // }
+                            trxProv.updateTrxQty(
+                              transaksi: trxProv.currentTransaksi!,
+                              detail: dtl,
+                              newValue: -qty,
+                            );
                           }
                         : null,
                   ),

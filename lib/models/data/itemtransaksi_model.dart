@@ -60,4 +60,30 @@ class ItemtransaksiModel {
     "qty": qty,
     "diskon": diskon,
   };
+
+  ItemtransaksiModel copyWith({
+    int? id,
+    int? idTransaksi,
+    int? idProduk,
+    String? namaProduk,
+    int? idSatuan,
+    String? namaSatuan,
+    int? isi,
+    double? harga,
+    int? qty,
+    double? diskon,
+  }) {
+    return ItemtransaksiModel(
+      id: id ?? this.id,
+      idTransaksi: idTransaksi ?? this.idTransaksi,
+      idProduk: idProduk ?? this.idProduk,
+      namaProduk: namaProduk ?? this.namaProduk,
+      idSatuan: idSatuan ?? this.idSatuan,
+      namaSatuan: namaSatuan ?? this.namaSatuan,
+      isi: isi ?? this.isi,
+      harga: harga ?? this.harga,
+      qty: qty ?? this.qty,
+      diskon: diskon ?? this.diskon,
+    );
+  }
 }

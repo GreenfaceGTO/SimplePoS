@@ -68,4 +68,30 @@ class TransaksiModel {
     "status": status,
     "catatan": catatan,
   };
+
+  TransaksiModel copyWith({
+    int? id,
+    String? tanggal,
+    String? tipe,
+    double? total,
+    String? caraBayar,
+    double? bayar,
+    double? kembali,
+    String? status,
+    String? catatan,
+    List<ItemtransaksiModel>? lstDetail,
+  }) {
+    return TransaksiModel(
+      id: id ?? this.id,
+      tanggal: tanggal ?? this.tanggal,
+      tipe: tipe ?? this.tipe,
+      total: total ?? this.total,
+      caraBayar: caraBayar ?? this.caraBayar,
+      bayar: bayar ?? this.bayar,
+      kembali: kembali ?? this.kembali,
+      status: status ?? this.status,
+      catatan: catatan ?? this.catatan,
+      lstDetail: lstDetail ?? this.lstDetail.map((e) => e.copyWith()).toList(),
+    );
+  }
 }

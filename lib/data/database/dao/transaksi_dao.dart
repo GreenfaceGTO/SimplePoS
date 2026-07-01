@@ -56,10 +56,11 @@ class TransaksiDao {
     try {
       return await db.transaction((txn) async {
         // update stok
-        await txn.execute(
-          """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
-          [newValue, detail.idProduk],
-        );
+        await updateStok(txn, idProduk: detail.idProduk!, newValue: -newValue);
+        // txn.execute(
+        //   """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
+        //   [-newValue, detail.idProduk],
+        // );
 
         // update detail transaksi
         await txn.execute(
@@ -70,8 +71,19 @@ class TransaksiDao {
         // update total transaksi
         await txn.execute(
           """UPDATE ${TableScheme.tbTranshd} SET total=total+? WHERE id=?""",
-          [],
+          [transaksi.total, transaksi.id],
         );
+
+        // update mutasi
+        final mutasi = MutasistokModel(
+          idTransaksi: transaksi.id,
+          idProduk: detail.idProduk,
+          pos: newValue < 0 ? 'OUT' : 'IN',
+          keterangan: "",
+          qty: newValue,
+        );
+
+        await updateMutasi(txn, mutasi);
 
         return true;
       });

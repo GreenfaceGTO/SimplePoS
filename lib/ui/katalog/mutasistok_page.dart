@@ -57,30 +57,64 @@ class _MutasistokPageState extends State<MutasistokPage> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ListTile(
-            title: Text(produk.namaProduk!, style: tema.textTheme.titleMedium),
-            subtitle: Column(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Satuan: ${produk.lstSatuan![0].satuan}"),
-                if (produk.lstSatuan![0].barcode!.isNotEmpty)
-                  Text("Barcode: ${produk.lstSatuan![0].barcode}"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        produk.namaProduk!,
+                        style: tema.textTheme.titleLarge,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Text.rich(
+                      TextSpan(
+                        text: "Satuan: ",
+                        children: [
+                          TextSpan(
+                            text: produk.lstSatuan![0].satuan,
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Text("Satuan : ${produk.lstSatuan![0].satuan}"),
+                  ],
+                ),
               ],
             ),
           ),
+          Container(
+            margin: EdgeInsets.only(top: 8, bottom: 8),
+            color: Colors.black54,
+            height: 1,
+            width: double.infinity,
+          ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SizedBox(
-              width: 200,
-              child: TextFormField(
-                controller: TextEditingController(
-                  text: "$selectedMonth $selectedYear",
+            padding: const EdgeInsets.only(left: 16, right: 8),
+            child: Row(
+              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Periode:  ",
+                  style: tema.textTheme.titleSmall!.copyWith(
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
-                decoration: InputDecoration(
-                  label: Text("Periode"),
-                  // border: InputBorder.none,
-                  suffixIcon: IconButton(
+                SizedBox(
+                  height: 45,
+                  child: TextButton.icon(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    iconAlignment: IconAlignment.end,
                     onPressed: () async {
                       final result = await PublicWidget.customPeriodPicker(
                         context,
@@ -97,20 +131,18 @@ class _MutasistokPageState extends State<MutasistokPage> {
                         );
                       }
                     },
-                    icon: Icon(
-                      Icons.calendar_month,
-                      size: 18,
-                      color: tema.colorScheme.primary,
-                    ),
+                    label: Text("$selectedMonth $selectedYear"),
+                    icon: Icon(Icons.calendar_month, size: 18),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
+
           Container(
             margin: EdgeInsets.symmetric(vertical: 4),
             padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            decoration: BoxDecoration(color: Colors.cyan.shade100),
+            decoration: BoxDecoration(color: Colors.grey.shade200),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -128,7 +160,7 @@ class _MutasistokPageState extends State<MutasistokPage> {
                   verticalInside: BorderSide(color: Colors.black38, width: 0.3),
                   top: BorderSide(color: Colors.black38, width: 1),
                 ),
-                headingRowColor: WidgetStatePropertyAll(Colors.cyan.shade100),
+                headingRowColor: WidgetStatePropertyAll(Colors.teal.shade50),
                 columnSpacing: 20,
                 horizontalMargin: 16,
                 columns: [

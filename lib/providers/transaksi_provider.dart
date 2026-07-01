@@ -27,41 +27,44 @@ class TransaksiProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  // --------------------------------
-  // Mengupdate qty item detail
-  // --------------------------------
+  // --------------------------------------
+  // Mengupdate qty item detail transaksi
+  // --------------------------------------
   Future<void> updateTrxQty({
-    required TransaksiModel trx,
+    required TransaksiModel transaksi,
     required ItemtransaksiModel detail,
     required int newValue,
   }) async {
-    // log("step 3 [$runtimeType]: tambah $newValue di detail transaksi");
-    // if (currentTransaksi!.id == trx.id) {
-    //   int idx = _currentTransaksi!.lstDetail.indexWhere(
-    //     (e) => e.id == detail.id,
-    //   );
-    //   detail.qty = detail.qty! + newValue;
+    log(detail.toMap().toString());
+    log("$runtimeType: ${newValue.toString()}");
+    final newTotal =
+        transaksi.total! + ((detail.qty! + newValue) * detail.isi!);
+    final trxCopy = transaksi.copyWith(total: newTotal);
+    try {
+      final result = await _transaksiRepo.updateTrxQty(
+        trxCopy,
+        detail,
+        newValue,
+      );
+      if (result) {
+        // update local :
+        // update stok
+        masterProvider.updateLocalStok(detail.idProduk!, newValue);
 
-    //   _currentTransaksi!.lstDetail[idx] = detail;
-    //   // log("Qty sebelum ubah ${item.qty}");
-    //   // log("akan ditambahkan $newValue");
-    //   // item.qty = item.qty! + newValue;
-    //   // log("Qty setelah ubah ${item.qty}");
-    //   // log(
-    //   //   "step 3 a : [$runtimeType] qty di currentTransaksi diupdate sejumlah ${item.qty}",
-    //   // );
-    //   // log("selengkapnya ${item.toMap()}");
-    // }
+        // update detail
+        detail.qty = detail.qty! + newValue;
+        int idxDetail = transaksi.lstDetail.indexWhere(
+          (e) => e.id == detail.id,
+        );
+        transaksi.lstDetail[idxDetail] = detail;
 
-    // // jika transaksi ada di daftar transaksi, ubah juga
-    // if (daftarTrxHariIni.any((e) => e.id == trx.id)) {
-    //   int idxh = daftarTrxHariIni.indexWhere((e) => e.id == trx.id);
-    //   final dtTrx = daftarTrxHariIni[idxh];
-    //   int idxd = dtTrx.lstDetail.indexWhere((e) => e.id == detail.id);
-    //   final item = dtTrx.lstDetail[idxd];
-    //   item.qty = item.qty! + newValue;
-    // }
-    // notifyListeners();
+        // update header
+        transaksi.total = trxCopy.total;
+        notifyListeners();
+      }
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
   }
 
   // -------------------------------

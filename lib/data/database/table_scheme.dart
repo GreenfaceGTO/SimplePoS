@@ -55,7 +55,6 @@ class TableScheme {
     status     TEXT    CHECK (status IN ("draft", "pending", "selesai", "batal") ),
     catatan    TEXT
 );
-
 ''';
 
   static const createTbTransdt = '''CREATE TABLE $tbTransdt (
