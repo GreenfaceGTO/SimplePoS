@@ -195,15 +195,16 @@ class _CartPageState extends State<CartPage> {
   bool bisaTambah(ItemtransaksiModel data) {
     int idx = _mstProv.daftarProduk.indexWhere((e) => e.id == data.idProduk);
     final item = _mstProv.daftarProduk[idx];
+    log("bisa tambah ${(item.stok! - (data.isi!)) > data.isi!}");
 
-    return item.stok! > data.isi!;
+    return (item.stok! - data.isi!) > data.isi!;
   }
 
   bool bisaKurang(ItemtransaksiModel data) {
     int idx = _mstProv.daftarProduk.indexWhere((e) => e.id == data.idProduk);
     final item = _mstProv.daftarProduk[idx];
-
-    return item.stok! - data.isi! > 0;
+    log("bisa kurang ${(item.stok! - data.isi!) > 0}");
+    return data.qty! > 1 && item.stok! - data.isi! > 0;
   }
 
   Widget _itemCard(
@@ -211,100 +212,101 @@ class _CartPageState extends State<CartPage> {
     TransaksiProvider trxProv,
     BuildContext context,
   ) {
-    return InkWell(
-      onTap: () {
-        log(dtl.toMap().toString());
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.blueGrey.shade300, width: 0.3),
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.shade200,
-              offset: Offset(3, 3),
-              blurRadius: 3,
-              spreadRadius: 3,
-            ),
-          ],
-        ),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.blueGrey.shade300, width: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            offset: Offset(3, 3),
+            blurRadius: 3,
+            spreadRadius: 3,
+          ),
+        ],
+      ),
 
-        padding: EdgeInsets.all(8),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    dtl.namaProduk!,
-                    style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-                  ),
+      padding: EdgeInsets.all(8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  dtl.namaProduk!,
+                  style: TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
                 ),
-                IconButton(
-                  onPressed: () {
-                    deleteItem(context, trxProv, dtl);
-                  },
-                  icon: Icon(
-                    Icons.delete_forever_outlined,
-                    size: 18,
-                    color: Colors.red,
-                  ),
+              ),
+              IconButton(
+                onPressed: () {
+                  deleteItem(context, trxProv, dtl);
+                },
+                icon: Icon(
+                  Icons.delete_forever_outlined,
+                  size: 18,
+                  color: Colors.red,
                 ),
-              ],
-            ),
-            SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(dtl.namaSatuan!),
-                SizedBox(
-                  width: 100,
-                  child: QuantityStepper(
-                    value: dtl.qty!,
-                    tambah: bisaTambah(dtl)
-                        ? () async {
-                            final qty = dtl.isi!;
-                            log("$runtimeType : cart tambah $qty");
-                            trxProv.updateTrxQty(
-                              transaksi: trxProv.currentTransaksi!,
-                              detail: dtl,
-                              newValue: qty,
-                            );
-                          }
-                        : null,
-                    kurang: bisaKurang(dtl)
-                        ? () async {
-                            final qty = dtl.isi!;
-                            trxProv.updateTrxQty(
-                              transaksi: trxProv.currentTransaksi!,
-                              detail: dtl,
-                              newValue: -qty,
-                            );
-                          }
-                        : null,
-                  ),
+              ),
+            ],
+          ),
+          // SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "@${PublicWidget.toRupiah.format(dtl.harga)} /${dtl.namaSatuan!.toUpperCase()}",
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+              Text(
+                'x',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
+              SizedBox(
+                width: 100,
+                child: QuantityStepper(
+                  value: dtl.qty!,
+                  tambah: bisaTambah(dtl)
+                      ? () async {
+                          // final qty = dtl.isi!;
+                          // log("$runtimeType : cart tambah $qty");
+                          trxProv.updateTrxQty(
+                            transaksi: trxProv.currentTransaksi!,
+                            detail: dtl,
+                            newValue: 1,
+                          );
+                        }
+                      : null,
+                  kurang: bisaKurang(dtl)
+                      ? () async {
+                          // final qty = dtl.isi!;
+                          trxProv.updateTrxQty(
+                            transaksi: trxProv.currentTransaksi!,
+                            detail: dtl,
+                            newValue: -1,
+                          );
+                        }
+                      : null,
                 ),
-              ],
-            ),
-            Divider(thickness: 0.8, color: Colors.black),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("${PublicWidget.toRupiah.format(dtl.harga)} x ${dtl.qty}"),
-                Text(
-                  PublicWidget.toRupiah.format(dtl.qty! * dtl.harga!),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                  ),
+              ),
+            ],
+          ),
+          Divider(thickness: 0.8, color: Colors.black),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                PublicWidget.toRupiah.format(dtl.qty! * dtl.harga!),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

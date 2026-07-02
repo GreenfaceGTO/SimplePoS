@@ -35,10 +35,13 @@ class TransaksiProvider with ChangeNotifier {
     required ItemtransaksiModel detail,
     required int newValue,
   }) async {
-    log(detail.toMap().toString());
-    log("$runtimeType: ${newValue.toString()}");
-    final newTotal =
-        transaksi.total! + ((detail.qty! + newValue) * detail.isi!);
+    double tambahan = detail.harga! * newValue;
+
+    final newTotal = transaksi.total! + tambahan;
+
+    log("new harga : $tambahan");
+    log("Total Sebelum : ${transaksi.total}");
+    log("Total sesudah : $newTotal");
     final trxCopy = transaksi.copyWith(total: newTotal);
     try {
       final result = await _transaksiRepo.updateTrxQty(
@@ -116,7 +119,9 @@ class TransaksiProvider with ChangeNotifier {
       detail.id ??= result.id;
 
       // periksa jika item yang akan ditambahkan sudah ada di daftar detail transaksi
-      bool ada = transaksi.lstDetail.any((e) => e.idProduk == detail.idProduk);
+      bool ada = transaksi.lstDetail.any(
+        (e) => e.idProduk == detail.idProduk && e.idSatuan == detail.idSatuan,
+      );
 
       if (ada) {
         // item sudah ada, update jumlahnya
@@ -162,22 +167,27 @@ class TransaksiProvider with ChangeNotifier {
           );
         }
 
-        // jika data yang dikirim adalah transaksi aktif saat ini
-        if (data.id == _currentTransaksi!.id) {
-          _lstTodayTrx.removeWhere((e) => e.id == currentTransaksi!.id!);
-          _currentTransaksi = null;
-        } else {
-          // periksa jika data yang dikirim adalah data pending
-          final inPending = _lstPendingTrx.any((e) => e.id == data.id);
-          if (inPending) {
-            _lstPendingTrx.removeWhere((e) => e.id == data.id);
+        // TODO: ada bug disini kare belum lengkap
+        // Reproduce : coba hapus transaksi tunda hari sebelumnya saat belum ada transaksi aktif
+        // periksa jika ada transaksi aktif
+        if (_currentTransaksi != null) {
+          // jika data yang dikirim adalah transaksi aktif saat ini
+          if (data.id == _currentTransaksi!.id) {
+            _lstTodayTrx.removeWhere((e) => e.id == currentTransaksi!.id!);
+            _currentTransaksi = null;
           } else {
-            log("$runtimeType: message");
+            // periksa jika data yang dikirim adalah data pending
+            final inPending = _lstPendingTrx.any((e) => e.id == data.id);
+            if (inPending) {
+              _lstPendingTrx.removeWhere((e) => e.id == data.id);
+            } else {
+              log("$runtimeType: message");
+            }
           }
+          notifyListeners();
+        } else {
+          log("$runtimeType: ${result.toString()}");
         }
-        notifyListeners();
-      } else {
-        log("$runtimeType: ${result.toString()}");
       }
     } catch (e) {
       PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
@@ -188,7 +198,7 @@ class TransaksiProvider with ChangeNotifier {
   /// Menambahkan transaksi baru, metode ini dipanggil hanya saat user menambahkan item pertama ke dalam keranjang. Untuk item selanjutnya menggunakan metode [addNewDetailToCart]
   // ----------------------------------------------------------------------------------------------------
   Future<bool> addNewTransaksi(ItemtransaksiModel firstItem) async {
-    var total = firstItem.harga! * (firstItem.isi! * firstItem.qty!);
+    var total = firstItem.harga! * firstItem.qty!;
 
     final newTrx = TransaksiModel(
       tipe: 'jual',

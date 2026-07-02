@@ -57,10 +57,6 @@ class TransaksiDao {
       return await db.transaction((txn) async {
         // update stok
         await updateStok(txn, idProduk: detail.idProduk!, newValue: -newValue);
-        // txn.execute(
-        //   """UPDATE ${TableScheme.tbItem} SET stok = stok + ? WHERE id=?""",
-        //   [-newValue, detail.idProduk],
-        // );
 
         // update detail transaksi
         await txn.execute(
@@ -110,16 +106,22 @@ class TransaksiDao {
         // periksa jika item sudah ada
         final dtlTransaksi = await txn.query(
           TableScheme.tbTransdt,
-          where: "id_header=? AND id_item=?",
-          whereArgs: [newDetail.idTransaksi, newDetail.idProduk],
+          where: "id_header=? AND id_item=? AND id_satuan=?",
+          whereArgs: [
+            newDetail.idTransaksi,
+            newDetail.idProduk,
+            newDetail.idSatuan,
+          ],
           limit: 1,
         );
 
         if (dtlTransaksi.isNotEmpty) {
-          // casting menjadi itemtransaksi
+          // jika detail ada, casting menjadi itemtransaksi
           List<ItemtransaksiModel> lstItem = dtlTransaksi
               .map((e) => ItemtransaksiModel.fromMap(e))
               .toList();
+
+          // ambil posisi indexnya
           final idx = lstItem.indexWhere(
             (e) => e.idProduk == newDetail.idProduk,
           );
@@ -179,17 +181,19 @@ class TransaksiDao {
 
     try {
       return await db.transaction<TransaksiModel>((txn) async {
-        // Menyimpan header transaksi
+        // =========== Menyimpan header transaksi ===========
         final idTrx = await txn.insert(TableScheme.tbTranshd, trxData.toDb());
         trxData.id = idTrx;
 
-        // insert data detail
+        // =========== looping data detail ===========
         for (var dtl in trxData.lstDetail) {
           dtl.idTransaksi = idTrx;
 
           log(
             "$runtimeType: insert item ${dtl.namaProduk} pada detail transaksi sejumlah ${dtl.qty}",
           );
+
+          // =========== Menyimpan data detail ===========
           final detailId = await txn.insert(TableScheme.tbTransdt, dtl.toMap());
           dtl.id = detailId;
 

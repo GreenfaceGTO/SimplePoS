@@ -68,7 +68,7 @@ class TableScheme {
     harga       REAL,
     qty         INTEGER,
     diskon      REAL,
-    UNIQUE (id_header,id_item)
+    UNIQUE (id_header,id_item,id_satuan)
 );
 ''';
 

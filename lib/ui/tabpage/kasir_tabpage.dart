@@ -41,11 +41,15 @@ class _KasirTabpageState extends State<KasirTabpage> {
       if (await trxProv.addNewTransaksi(newDetail)) {
         PublicWidget.showMessage(
           message:
-              "${newDetail.qty} item ${newDetail.namaProduk} ditambahkan ke keranjang",
+              "${newDetail.qty} ${newDetail.namaSatuan!.trim()} ${newDetail.namaProduk} ditambahkan ke keranjang",
         );
       }
     } else {
       trxProv.addNewDetailToCart(trxProv.currentTransaksi!, newDetail);
+      PublicWidget.showMessage(
+        message:
+            "${newDetail.qty} ${newDetail.namaSatuan!.trim()} ${newDetail.namaProduk} ditambahkan ke keranjang",
+      );
     }
   }
 
@@ -240,6 +244,7 @@ class _KasirTabpageState extends State<KasirTabpage> {
                 item: item,
               );
               if (result != null) {
+                // log(result.toMap().toString());
                 newItemAdded(result);
               }
             },

@@ -119,9 +119,9 @@ class _TrxsatuanbottomsheetState extends State<Trxsatuanbottomsheet> {
                 );
                 trxItem.namaProduk = widget.item.namaProduk!;
                 trxItem.idProduk = widget.item.id;
-
                 trxItem.qty = lstQuantity[selectedIndex];
 
+                // log(trxItem.toMap().toString());
                 Navigator.pop(context, trxItem);
               },
               label: Text("MASUKKAN KERANJANG"),
