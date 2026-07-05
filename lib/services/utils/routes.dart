@@ -5,6 +5,7 @@ import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/dummy_page.dart';
 import 'package:simplepos/ui/katalog/katalog_form.dart';
 import 'package:simplepos/ui/katalog/mutasistok_page.dart';
+import 'package:simplepos/ui/katalog/opname/daftaropname_page.dart';
 import 'package:simplepos/ui/pengaturan/manage_page.dart';
 import 'package:simplepos/ui/ref/satuan_form.dart';
 import 'package:simplepos/ui/mainframe_page.dart';
@@ -13,6 +14,7 @@ import 'package:simplepos/ui/portal/register_page.dart';
 import 'package:simplepos/ui/portal/splashscreen_page.dart';
 import 'package:simplepos/ui/transaksi/cart_page.dart';
 import 'package:simplepos/ui/transaksi/pending/oldpendinglist_page.dart';
+import 'package:simplepos/ui/katalog/opname/produkbrowser.dart';
 
 class AppRoutes {
   static Map<String, WidgetBuilder> routes = {
@@ -23,6 +25,8 @@ class AppRoutes {
     rtSettings: (_) => ManagePage(),
     rtCartPage: (_) => CartPage(),
     rtPendingPage: (_) => OldpendinglistPage(),
+    rtOpnamePage: (_) => DaftaropnamePage(),
+    rtProdukBrowser: (_) => ProdukBrowser(),
   };
 
   static Route<dynamic> generateRoute(RouteSettings setting) {

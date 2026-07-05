@@ -23,6 +23,8 @@ const String rtSettings = "/pengaturan";
 const String rtCartPage = "/keranjang";
 const String rtPendingPage = "/pendingpage";
 const String rtMutasiStok = "/mutasistok";
+const String rtOpnamePage = "/opnamepage";
+const String rtProdukBrowser = "/produkbrowser";
 
 const String rtFormKatalogProduk = "formkatalogproduk";
 const String rtFormMasterKategori = "/formmasterkategori";

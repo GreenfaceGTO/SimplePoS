@@ -98,7 +98,9 @@ class ProdukDao {
     }
   }
 
-  // ======== Mengupdate Produk ============
+  // ----------------------
+  // Mengupdate Produk
+  // ----------------------
   Future<ProdukModel> updateProduk(ProdukModel updatedData) async {
     final db = await Dbmanager.database;
     try {
@@ -170,7 +172,9 @@ class ProdukDao {
     }
   }
 
-  // ======Menghapus produk===========
+  // ------------------------
+  // Menghapus produk
+  // ------------------------
   Future<bool> deleteProduk(ProdukModel data) async {
     final db = await Dbmanager.database;
 

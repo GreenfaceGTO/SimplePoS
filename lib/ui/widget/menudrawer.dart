@@ -42,6 +42,9 @@ class _MenudrawerState extends State<Menudrawer> {
         Navigator.pushNamed(context, rtMasterProduk);
 
         break;
+      case "Stok Opname":
+        Navigator.pushNamed(context, rtOpnamePage);
+        break;
       case "Pengaturan":
         Navigator.pushNamed(context, rtSettings);
       default:

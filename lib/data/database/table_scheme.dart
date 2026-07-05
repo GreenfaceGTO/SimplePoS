@@ -6,6 +6,8 @@ class TableScheme {
   static const tbTransdt = "tb_transdt";
   static const tbMutasiStok = 'tb_mutasistok';
   static const tbSaldo = 'tb_saldo';
+  static const tbOpnameHd = "tb_sohd";
+  static const tbOpnameDt = "tb_sodt";
 
   static const createTbUsaha = '''CREATE TABLE $tbUsaha (
     kode_usaha    TEXT,
@@ -41,6 +43,24 @@ class TableScheme {
     pot_kemasan REAL,
 
     UNIQUE(id_produk, satuan)
+);
+''';
+
+  static const createTbSohd = '''CREATE TABLE $tbOpnameHd (
+    id         INTEGER PRIMARY KEY,
+    tanggal    TEXT,
+    keterangan TEXT
+);
+''';
+
+  static const createTbSodt = '''CREATE TABLE $tbOpnameDt (
+    id          INTEGER PRIMARY KEY,
+    id_header   INTEGER REFERENCES tb_sohd (id) ON DELETE CASCADE,
+    id_item     INTEGER REFERENCES tb_item (id) ON DELETE CASCADE,
+    stok_sistem INTEGER,
+    stok_fisik  INTEGER,
+
+    UNIQUE(id_header,id_item)
 );
 ''';
 

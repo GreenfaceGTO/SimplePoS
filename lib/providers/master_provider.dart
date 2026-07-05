@@ -114,13 +114,17 @@ class MasterProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // -----------------
   // set data usaha
+  // -----------------
   void setUsahaData(UsahaModel data) {
     _dataUsaha = data;
     notifyListeners();
   }
 
+  // ------------------------------
   // menambahkan kategori (lokal)
+  // ------------------------------
   void addNewKategori(String value) {
     if (!_daftarKategori.contains(value)) {
       _daftarKategori.add(value);
@@ -134,7 +138,9 @@ class MasterProvider with ChangeNotifier {
     }
   }
 
+  // -----------------------------
   // Menambahkan satuan (lokal)
+  // -----------------------------
   Future<bool> addNewSatuan(String value) async {
     if (!_daftarSatuan.contains(value)) {
       _daftarSatuan.add(value);
@@ -150,7 +156,9 @@ class MasterProvider with ChangeNotifier {
     }
   }
 
-  // =========inisialisasi provider=========
+  // ---------------------------
+  // inisialisasi provider
+  // ---------------------------
   Future<void> init() async {
     if (_initialized) return;
     _daftarProduk = await _masterDataRepo.fetchAllProduk();
@@ -161,13 +169,17 @@ class MasterProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // ======== Memuat data usaha ==========
+  // --------------------
+  // Memuat data usaha
+  // --------------------
   Future<void> loadDataUsaha() async {
     _dataUsaha = await _masterDataRepo.getDataUsaha();
     notifyListeners();
   }
 
-  // ====== Mengumpulkan tag kategori dari data produk ============
+  // --------------------------------------------
+  // Mengumpulkan tag kategori dari data produk
+  // --------------------------------------------
   Future<List<String>> buildKategoriList() async {
     List<String> result = [];
     for (var item in _daftarProduk) {
@@ -183,7 +195,9 @@ class MasterProvider with ChangeNotifier {
     return result;
   }
 
-  // ========= Mengumpulkan data satuan dari data produk ==============
+  // -------------------------------------------
+  // Mengumpulkan data satuan dari data produk
+  // -------------------------------------------
   Future<List<String>> buildSatuanList() async {
     List<String> result = [];
     for (var item in daftarProduk) {
@@ -199,7 +213,9 @@ class MasterProvider with ChangeNotifier {
     return result;
   }
 
-  // =========== Menambahkan produk ===========
+  // --------------------
+  // Menambahkan produk
+  // --------------------
   Future<bool> addNewProduk(ProdukModel newProduk) async {
     try {
       var result = await _masterDataRepo.addNewProduk(newProduk);
@@ -213,7 +229,9 @@ class MasterProvider with ChangeNotifier {
     return false;
   }
 
-  // =========== Mengupdate produk =============
+  // -------------------
+  // Mengupdate produk
+  // -------------------
   Future<bool> updateProduk(ProdukModel updatedProduk) async {
     try {
       log("$runtimeType : ${updatedProduk.toMap().toString()}");
@@ -229,7 +247,9 @@ class MasterProvider with ChangeNotifier {
     return false;
   }
 
-  // ======= Menghapus produk ==========
+  // ------------------
+  // Menghapus produk
+  // ------------------
   Future<void> deleteProduk(ProdukModel data) async {
     try {
       final result = await _masterDataRepo.delProduk(data);
