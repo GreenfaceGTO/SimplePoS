@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/providers/opname_provider.dart';
@@ -22,7 +24,11 @@ class _OpnamelistitemPageState extends State<OpnamelistitemPage> {
             children: [
               if (_showInfo)
                 MaterialBanner(
-                  content: Text("Perhitungan harus menggunakan satuan dasar"),
+                  backgroundColor: Colors.teal,
+                  elevation: 3,
+                  contentTextStyle: TextStyle(color: Colors.white),
+                  leading: Icon(Icons.info_outline, color: Colors.white),
+                  content: Text("Input dengan menggunakan satuan dasar"),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -30,19 +36,35 @@ class _OpnamelistitemPageState extends State<OpnamelistitemPage> {
                           _showInfo = false;
                         });
                       },
-                      child: Text("OK"),
+                      child: Text("OK", style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),
               Expanded(
                 child: SizedBox(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    children: prov.currentTask!.lstDetail!.map((item) {
-                      return Column(children: [Text(item.namaProduk!)]);
-                    }).toList(),
+                  child: ListView.separated(
+                    itemBuilder: (context, idx) {
+                      var data = prov.currentTask!.lstDetail![idx];
+                      return ListTile(
+                        onTap: () {
+                          log("hitung");
+                        },
+                        title: Text(data.namaProduk!),
+                        subtitle: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Stok Sistem: ${data.stokSistem.toString()}"),
+                            Text("Stok Fisik: ${data.stokFisik.toString()}"),
+                          ],
+                        ),
+                        trailing: Icon(Icons.summarize_outlined),
+                      );
+                    },
+                    separatorBuilder: (context, idx) {
+                      return Divider();
+                    },
+                    itemCount: prov.currentTask!.lstDetail!.length,
                   ),
                 ),
               ),

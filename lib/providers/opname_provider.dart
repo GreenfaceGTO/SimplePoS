@@ -14,6 +14,36 @@ class OpnameProvider with ChangeNotifier {
   OpnameModel? _currentTask;
   OpnameModel? get currentTask => _currentTask;
 
+  Future<void> loadData({int? tahun, int? bulan}) async {
+    try {
+      final result = await opnameRepo.fetchData(tahun: tahun, bulan: bulan);
+      if (result.isNotEmpty) {
+        _lstHistoryOpname = result;
+        for (var opname in _lstHistoryOpname) {
+          if (!opname.isComplete()) {
+            _currentTask = opname;
+            break;
+          }
+        }
+        // // jika ada history yang belum selesai dihitung, masukkan sebagai currentask;
+        // bool hasUnComplete = _lstHistoryOpname.any(
+        //   (h) => h.lstDetail!.any((dt) => dt.stokFisik == null),
+        // );
+        // if (hasUnComplete) {
+        //   for (var opname in _lstHistoryOpname) {
+        //     if (opname.lstDetail!.any((dt) => dt.stokFisik == null)) {
+        //       _currentTask = opname;
+        //       break;
+        //     }
+        //   }
+        // }
+      }
+      notifyListeners();
+    } catch (e) {
+      PublicWidget.showMessage(message: e.toString(), mode: MessageMode.error);
+    }
+  }
+
   // ---------------------
   // Membuat data opname
   // ---------------------

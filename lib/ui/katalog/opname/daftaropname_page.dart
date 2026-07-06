@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:simplepos/providers/opname_provider.dart';
 import 'package:simplepos/services/utils/extension.dart';
+import 'package:simplepos/ui/katalog/opname/opnamelistitem_page.dart';
 import 'package:simplepos/ui/katalog/opname/produkbrowser.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 import 'package:simplepos/ui/widget/reusable/rowfield_element.dart';
@@ -14,6 +17,14 @@ class DaftaropnamePage extends StatefulWidget {
 }
 
 class _DaftaropnamePageState extends State<DaftaropnamePage> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<OpnameProvider>().loadData();
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<OpnameProvider>(
@@ -47,13 +58,29 @@ class _DaftaropnamePageState extends State<DaftaropnamePage> {
                       bool currentTask =
                           prov.currentTask != null &&
                           opn.id == prov.currentTask!.id;
-
+                      final progress = opn.progress();
+                      log(opn.toMap().toString());
                       return Container(
                         padding: EdgeInsets.all(12),
+                        margin: EdgeInsets.symmetric(vertical: 4),
                         decoration: BoxDecoration(
-                          color: currentTask ? Colors.orange.shade50 : null,
-                          border: Border.all(color: Colors.black38, width: 0.5),
+                          color: currentTask
+                              ? Theme.of(context).primaryColorLight
+                              : null,
+                          border: Border.all(
+                            color: Colors.orange.shade500,
+                            width: 0.3,
+                          ),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: currentTask
+                              ? [
+                                  BoxShadow(
+                                    blurRadius: 5,
+                                    offset: Offset(1, 3),
+                                    color: Colors.black26,
+                                  ),
+                                ]
+                              : null,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -64,20 +91,50 @@ class _DaftaropnamePageState extends State<DaftaropnamePage> {
                                 DateTime.parse(
                                   opn.tanggal!,
                                 ).toIndonesianDate(withTime: true),
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                             ),
-                            CustomRowField(
-                              title: "Jlh. Produk:",
-                              value: Text(opn.lstDetail!.length.toString()),
-                            ),
+
                             if (prov.currentTask != null &&
                                 opn.id == prov.currentTask!.id)
                               Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CustomRowField(
+                                    title: "Kemajuan:",
+                                    value: Text(
+                                      "${progress['complete']}/${opn.lstDetail!.length}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  CustomRowField(
                                     title: "Status:",
-                                    value: Text("Belum Selesai"),
+                                    value: Text(
+                                      "Belum selesai",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Divider(),
+                                  SizedBox(
+                                    height: 45,
+                                    child: OutlinedButton.icon(
+                                      iconAlignment: IconAlignment.end,
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                OpnamelistitemPage(),
+                                          ),
+                                        );
+                                      },
+                                      label: Text("LANJUTKAN"),
+                                      icon: Icon(Icons.arrow_forward),
+                                    ),
                                   ),
                                 ],
                               ),

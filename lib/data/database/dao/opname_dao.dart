@@ -1,9 +1,58 @@
 import 'package:simplepos/data/database/dbmanager.dart';
 import 'package:simplepos/data/database/table_scheme.dart';
+import 'package:simplepos/models/data/itemopname_model.dart';
 import 'package:simplepos/models/data/opname_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 
 class OpnameDao {
+  // ------------------------------------------------------------------
+  // Mengambil daftar riwayat opname periode ini, baik yang selesai
+  // maupun yang belum
+  // ------------------------------------------------------------------
+  Future<List<OpnameModel>> fetchOpnameHistory(int? tahun, int? bulan) async {
+    final db = await Dbmanager.database;
+    final today = DateTime.now();
+    tahun ??= today.year;
+    bulan ??= today.month;
+    DateTime awal = DateTime(tahun, bulan, 1);
+    DateTime akhir = DateTime(tahun, bulan + 1, 1);
+
+    try {
+      final data = await db.query(
+        TableScheme.tbOpnameHd,
+        where: "tanggal>=? AND tanggal<?",
+        whereArgs: [awal.toIso8601String(), akhir.toIso8601String()],
+        orderBy: "tanggal DESC",
+      );
+
+      if (data.isNotEmpty) {
+        List<OpnameModel> lstData = data
+            .map((e) => OpnameModel.fromMap(e))
+            .toList();
+
+        for (var opname in lstData) {
+          final detail = await db.query(
+            TableScheme.tbOpnameDt,
+            where: "id_header=?",
+            whereArgs: [opname.id],
+          );
+          opname.lstDetail = List.from(
+            detail.map((d) => ItemopnameModel.fromMap(d)),
+          );
+
+          // mengisi properti nama produk dari tabel item
+          for (var dtl in opname.lstDetail!) {
+            dtl.namaProduk = await getProductName(dtl.idProduk!);
+          }
+        }
+        return lstData;
+      }
+    } catch (e) {
+      Exception(e.toString());
+    }
+    return [];
+  }
+
   // ------------------------
   // Membuat data opname
   // ------------------------
@@ -12,7 +61,10 @@ class OpnameDao {
     try {
       return await db.transaction((txn) async {
         // simpan header
-        final idHeader = await txn.insert(TableScheme.tbOpnameHd, data.toMap());
+        final idHeader = await txn.insert(
+          TableScheme.tbOpnameHd,
+          data.toDbMap(),
+        );
         data.id = idHeader;
 
         // menyimpan data detail
@@ -30,6 +82,22 @@ class OpnameDao {
       Exception(e.toString());
     }
     return null;
+  }
+
+  // -------------------------------------------
+  // Mengambil nama item dari tabel produk
+  // -------------------------------------------
+  Future<String> getProductName(int id) async {
+    final db = await Dbmanager.database;
+    final result = await db.query(
+      TableScheme.tbItem,
+      where: "id=?",
+      whereArgs: [id],
+    );
+    if (result.isEmpty) {
+      return "Produk tidak ada di master";
+    }
+    return result.map((e) => ProdukModel.fromMap(e)).first.namaProduk!;
   }
 
   // ------------------------------------------------------------------------

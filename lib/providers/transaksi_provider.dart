@@ -167,7 +167,7 @@ class TransaksiProvider with ChangeNotifier {
           );
         }
 
-        // TODO: ada bug disini kare belum lengkap
+        // TODO: ada bug disini karena belum lengkap
         // Reproduce : coba hapus transaksi tunda hari sebelumnya saat belum ada transaksi aktif
         // periksa jika ada transaksi aktif
         if (_currentTransaksi != null) {

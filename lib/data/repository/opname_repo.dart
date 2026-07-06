@@ -5,6 +5,18 @@ import 'package:simplepos/models/data/produk_model.dart';
 class OpnameRepo {
   final OpnameDao _opnameDao = OpnameDao();
 
+  // ----------------------------------
+  // Mengambil daftar riwayat opname
+  // ----------------------------------
+  Future<List<OpnameModel>> fetchData({int? tahun, int? bulan}) async {
+    try {
+      return await _opnameDao.fetchOpnameHistory(tahun, bulan);
+    } catch (e) {
+      Exception(e.toString());
+    }
+    return [];
+  }
+
   // -----------------------
   // Menyimpan data opname
   // -----------------------

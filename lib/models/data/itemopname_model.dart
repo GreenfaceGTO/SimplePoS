@@ -22,8 +22,8 @@ class ItemopnameModel {
     idHeader: map['id_header'],
     namaProduk: map['nama_item'],
     idProduk: map['id_item'],
-    stokSistem: map['stok_sistem'],
-    stokFisik: map['stok_fisik'],
+    stokSistem: map['stok_sistem'] ?? 0,
+    stokFisik: map['stok_fisik'] ?? 0,
   );
 
   factory ItemopnameModel.fromProduk(ProdukModel data) => ItemopnameModel(

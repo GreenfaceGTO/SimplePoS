@@ -6,7 +6,6 @@ import 'package:simplepos/models/data/itemopname_model.dart';
 import 'package:simplepos/models/data/opname_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 import 'package:simplepos/providers/opname_provider.dart';
-import 'package:simplepos/services/utils/constant.dart';
 import 'package:simplepos/ui/katalog/opname/opnamelistitem_page.dart';
 import 'package:simplepos/ui/widget/reusable/emptydata_element.dart';
 
