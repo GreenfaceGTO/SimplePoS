@@ -23,13 +23,12 @@ class ItemopnameModel {
     namaProduk: map['nama_item'],
     idProduk: map['id_item'],
     stokSistem: map['stok_sistem'] ?? 0,
-    stokFisik: map['stok_fisik'] ?? 0,
+    stokFisik: map['stok_fisik'],
   );
 
   factory ItemopnameModel.fromProduk(ProdukModel data) => ItemopnameModel(
     idProduk: data.id,
     stokSistem: data.stok,
-    stokFisik: 0,
     namaProduk: data.namaProduk,
   );
 
@@ -41,6 +40,7 @@ class ItemopnameModel {
     "stok_sistem": stokSistem,
     "stok_fisik": stokFisik,
   };
+
   Map<String, dynamic> toDbMap() => {
     "id": id,
     "id_header": idHeader,

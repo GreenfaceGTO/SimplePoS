@@ -43,7 +43,9 @@ class OpnameModel {
 
   // Mengembalikan jumlah item selesai dan yang belum dihitung
   Map<String, dynamic> progress() => {
-    "complete": lstDetail!.where((e) => e.stokFisik! > 0).length,
+    "complete": lstDetail!
+        .where((e) => e.stokFisik != null && e.stokFisik! > 0)
+        .length,
     "uncomplete": lstDetail!.where((e) => e.stokFisik == 0).length,
   };
 }

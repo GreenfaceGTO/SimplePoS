@@ -98,12 +98,14 @@ class TableScheme {
     keterangan   TEXT,
     pos_tipe     TEXT    CHECK (pos_tipe IN ('IN', 'OUT') ) 
                          DEFAULT OUT,
+    id_opname    INTEGER REFERENCES tb_sodt (id) ON DELETE CASCADE,
     id_transaksi INTEGER REFERENCES tb_transhd (id) ON DELETE CASCADE,
     id_item      INTEGER REFERENCES tb_item (id) ON DELETE CASCADE,
     id_satuan    INTEGER REFERENCES tb_itemsat (id) ON DELETE CASCADE,
     qty          INTEGER,
     nilai        REAL
 );
+
 ''';
 
   static const createTbsaldo = '''CREATE TABLE $tbSaldo (

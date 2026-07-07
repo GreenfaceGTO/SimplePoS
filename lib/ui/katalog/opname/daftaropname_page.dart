@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:simplepos/models/data/opname_model.dart';
 import 'package:simplepos/providers/opname_provider.dart';
 import 'package:simplepos/services/utils/extension.dart';
 import 'package:simplepos/ui/katalog/opname/opnamelistitem_page.dart';
@@ -97,47 +98,7 @@ class _DaftaropnamePageState extends State<DaftaropnamePage> {
 
                             if (prov.currentTask != null &&
                                 opn.id == prov.currentTask!.id)
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CustomRowField(
-                                    title: "Kemajuan:",
-                                    value: Text(
-                                      "${progress['complete']}/${opn.lstDetail!.length}",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  CustomRowField(
-                                    title: "Status:",
-                                    value: Text(
-                                      "Belum selesai",
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Divider(),
-                                  SizedBox(
-                                    height: 45,
-                                    child: OutlinedButton.icon(
-                                      iconAlignment: IconAlignment.end,
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                OpnamelistitemPage(),
-                                          ),
-                                        );
-                                      },
-                                      label: Text("LANJUTKAN"),
-                                      icon: Icon(Icons.arrow_forward),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              _taskProgress(progress, opn, context),
                           ],
                         ),
                       );
@@ -146,6 +107,58 @@ class _DaftaropnamePageState extends State<DaftaropnamePage> {
                 ),
         );
       },
+    );
+  }
+
+  Column _taskProgress(
+    Map<String, dynamic> progress,
+    OpnameModel opn,
+    BuildContext context,
+  ) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CustomRowField(
+          title: "Kemajuan:",
+          value: Text(
+            "${progress['complete']}/${opn.lstDetail!.length}",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        CustomRowField(
+          title: "Status:",
+          value: Text(
+            "Belum selesai",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
+        Divider(),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              onPressed: () {},
+              icon: Icon(Icons.delete_forever_outlined, color: Colors.red),
+            ),
+            SizedBox(
+              height: 45,
+              child: OutlinedButton.icon(
+                iconAlignment: IconAlignment.end,
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => OpnamelistitemPage(),
+                    ),
+                  );
+                },
+                label: Text("LANJUTKAN"),
+                icon: Icon(Icons.arrow_forward),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

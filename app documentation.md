@@ -9,6 +9,9 @@
  Kebanyakan dari para pelaku usaha mikro dan menengah tidak memahami cara pencatatan usaha sesuai standar manajemen retail. Pencatatan biasanya hanya dilakukan secara sederhana sehingga tidak dapat dijadikan alat kontrol untuk pengembangan usaha.
 
 ## Ruang Lingkup 
+Aplikasi PoS dirancang secara sederhana dengan menggunakan database lokal untuk penyimpanan data. Ruang lingkup aplikasi meliputi pengelolaan data master produk dengan multi satuan, transaksi pembelian dan penjualan, manajemen produk, permintaan pasar yang tidak terpenuhi (unserve item) dan berbagai jenis pelaporan untuk bahan analisa usaha.
+
+## Target Pengguna
 
 
 ## Fitur Aplikasi

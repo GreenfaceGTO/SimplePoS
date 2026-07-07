@@ -118,7 +118,11 @@ class _MutasistokPageState extends State<MutasistokPage> {
                     onPressed: () async {
                       final result = await PublicWidget.customPeriodPicker(
                         context,
-                        initial: DateTime.now(),
+                        initial: DateTime(
+                          int.parse(selectedYear!),
+                          lstNamaBulan.indexOf(selectedMonth!) + 1,
+                          1,
+                        ),
                       );
                       if (result != null) {
                         setState(() {

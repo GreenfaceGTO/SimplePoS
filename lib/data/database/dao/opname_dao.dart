@@ -5,6 +5,28 @@ import 'package:simplepos/models/data/opname_model.dart';
 import 'package:simplepos/models/data/produk_model.dart';
 
 class OpnameDao {
+  // -------------------------------------------
+  // Menghapus data opname yang belum selesai
+  // -------------------------------------------
+  Future<bool> deleteOpname({required OpnameModel data}) async {
+    final db = await Dbmanager.database;
+    try {
+      // TODO : lanjutkan ini
+      return false;
+      // return await db.transaction((txn) async {
+      //   // update mutasi dan kembalikan stok ke awal sebelum perhitungan
+      //   for (var detail in data.lstDetail!) {
+      //     await txn.delete(TableScheme.tbMutasiStok)
+      //   }
+      //   // hapus data detail
+      //   // hapus data header
+
+      // });
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
   // ------------------------------------------------------------------
   // Mengambil daftar riwayat opname periode ini, baik yang selesai
   // maupun yang belum

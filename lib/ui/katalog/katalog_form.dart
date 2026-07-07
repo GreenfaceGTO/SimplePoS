@@ -184,24 +184,26 @@ class _KatalogFormState extends State<KatalogForm> {
         }
       case "satuan":
         if (value != null) {
-          // hanya update jika value adalah object satuan
-          if (value is ProdukSatModel) {
-            if (value.tipe == 'D') {
-              satDasar = value;
+          // hanya update jika value[data] adalah object satuan
+          if (value['data'] is ProdukSatModel) {
+            if (value['data'].tipe == 'D') {
+              satDasar = value['data'];
               data!.stok = satDasar!.stok;
             }
 
             // periksa jika satuan sudah ada di daftar
             bool exist = data!.lstSatuan!.any(
-              (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
+              (e) =>
+                  e.satuan!.toLowerCase() ==
+                  value['data'].satuan!.toLowerCase(),
             );
 
             if (!exist) {
               // jika satuan belum ada, tambahkan
-              data!.lstSatuan!.add(value);
+              data!.lstSatuan!.add(value['data']);
             } else {
-              // jika satuan belum ada, periksa mode form
-              if (widget.args.formMode == FormMode.input) {
+              // jika satuan belum ada, periksa mode data : input atau edit
+              if (value['mode'] == 'input') {
                 // jika mode input, tampilkan pesan satuan sudah ada
                 PublicWidget.showMessage(
                   message: "Satuan sudah ada",
@@ -210,10 +212,12 @@ class _KatalogFormState extends State<KatalogForm> {
               } else {
                 // jika mode edit, cari posisi index data di dalam daftar untuk diubah
                 int idx = data!.lstSatuan!.indexWhere(
-                  (e) => e.satuan!.toLowerCase() == value.satuan!.toLowerCase(),
+                  (e) =>
+                      e.satuan!.toLowerCase() ==
+                      value['data'].satuan!.toLowerCase(),
                 );
 
-                data!.lstSatuan![idx] = value;
+                data!.lstSatuan![idx] = value['data'];
               }
             }
           }
@@ -362,7 +366,13 @@ class _KatalogFormState extends State<KatalogForm> {
                                           ),
                                         );
                                     if (satKonv != null) {
-                                      updateField("satuan", value: satKonv);
+                                      updateField(
+                                        "satuan",
+                                        value: {
+                                          "data": satKonv,
+                                          "mode": "input",
+                                        },
+                                      );
                                     }
                                   },
                                   child: Text("Satuan Lainnya"),
@@ -466,14 +476,7 @@ class _KatalogFormState extends State<KatalogForm> {
             ),
           );
           if (satuanLain != null) {
-            updateField("satuan", value: satuanLain);
-            // int idx = data!.lstSatuan!.indexWhere(
-            //   (e) => e.satuan == satuanLain.satuan,
-            // );
-            // data!.lstSatuan![idx] = satuanLain;
-            // satLain.clear();
-            // satLain.addAll(data!.lstSatuan!);
-            // setState(() {});
+            updateField("satuan", value: {"data": satuanLain, "mode": "edit"});
           }
         } else {
           deleteSatuan(satuan);
@@ -607,14 +610,14 @@ class _KatalogFormState extends State<KatalogForm> {
               },
             ),
           );
-          log("$runtimeType : here");
+
           if (newSatDasar != null) {
             log(newSatDasar.toMap().toString());
-            // updateField('satuan', value: newSatDasar);
-            // setState(() {
-            //   satDasar = newSatDasar;
-            //   data!.lstSatuan![0] = newSatDasar;
-            // });
+            updateField('satuan', value: {"data": newSatDasar, "mode": "edit"});
+            setState(() {
+              satDasar = newSatDasar;
+              data!.lstSatuan![0] = newSatDasar;
+            });
           }
         } else {
           deleteSatuan(satDasar!);
@@ -673,7 +676,10 @@ class _KatalogFormState extends State<KatalogForm> {
                   ),
                 );
                 if (satuan != null) {
-                  updateField("satuan", value: satuan);
+                  updateField(
+                    "satuan",
+                    value: {'data': satuan, "mode": "input"},
+                  );
                 }
               }
             : null,
